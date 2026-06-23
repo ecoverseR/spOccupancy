@@ -40,10 +40,10 @@ library(lubridate)
 
 As an exmaple data set, we will use data from point count surveys on breeding birds in the Hubbard Brook Experimental Forest (HBEF). Briefly, observers performed standard point count surveys at 374 sites throughout HBEF. Typically each site was revisited three times during a given year, providing the necessary replication for occupancy modeling. During each point count survey, the observer records each individual bird they see within a pre-specified detection radius and within the 10-minute duration of the survey. This results in a number of individual birds for each species observed during each point count survey. 
 
-In the following code chunk, we read in the HBEF data set directly from the Hubbard Brook website. Note this will only work on your computer if you have an internet connection. 
+In the following code chunk, we read in the HBEF data set. Note this will only work on your computer if you have an internet connection. 
 
 ```{r}
-hb.dat <- read.csv(url("https://pasta.lternet.edu/package/data/eml/knb-lter-hbr/178/3/eecb146279aa290af2292d75d3ba0f8b"))
+hb.dat <- read.csv(url("https://doserlab.com/files/misc/data/hbef_raw_data.csv"))
 # Take a look at the data set
 str(hb.dat)
 ```

@@ -92,11 +92,11 @@ postHocLM <- function(formula, data, inits, priors, verbose = FALSE,
         stop("if specified, n.samples must be divisible by the number of samples the first stage model was fit.")
       } else {
         n.times <- n.samples / n.samples.y
-	y <- matrix(NA, n.samples, N)
-	for (i in 1:n.times) {
+	      y <- matrix(NA, n.samples, N)
+        for (i in 1:n.times) {
           row.indx <- ((i - 1) * n.samples.y + 1):(i * n.samples.y)
           y[row.indx, ] <- data$y
-	}
+        }
       }
     } else {
       n.samples <- n.samples.y

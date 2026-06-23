@@ -110,7 +110,8 @@ spPGOcc(occ.formula, det.formula, data, inits, priors,
     \code{"gaussian"}.}
 
   \item{tuning}{a list with each tag corresponding to a parameter
-    name. Valid tags are \code{phi} and \code{nu}. The value portion of each
+    name. Valid tags are \code{phi}, \code{nu}, and \code{sigma.sq} (if using 
+    a uniform prior for sigma.sq). The value portion of each
     tag defines the initial variance of the Adaptive sampler. See
     Roberts and Rosenthal (2009) for details.}
   

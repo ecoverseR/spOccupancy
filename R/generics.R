@@ -17,19 +17,20 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))) {
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
+  X.0 <- as.matrix(X.0)
   # Occurrence predictions ------------------------------------------------
   if (tolower(type) == 'occupancy') {  
     p.occ <- ncol(object$X)
@@ -38,7 +39,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.design <- p.occ + ncol(object$sigma.sq.psi.samples)
     }
     if (ncol(X.0) != p.design) {
-      stop(paste("error: X.0 must have ", p.design, " columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
     }
 
     # Composition sampling --------------------------------------------------
@@ -58,7 +59,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -114,7 +115,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.design <- p.det + ncol(object$sigma.sq.p.samples)
     }
     if (ncol(X.0) != p.design) {
-      stop(paste("error: X.0 must have ", p.design, " columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
     }
 
     # Composition sampling --------------------------------------------------
@@ -134,7 +135,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       x.p.re.names <- colnames(object$X.p.re)
       indx <- which(colnames(X.0) %in% x.p.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$det.covs")
+        stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -205,7 +206,7 @@ fitted.PGOcc <- function(object, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
   n.post <- object$n.post * object$n.chains
   X.p <- object$X.p
@@ -556,22 +557,22 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   #if (!is(object, c('spPGOcc', 'spIntPGOcc'))) {
   if (!(class(object) %in% c('spPGOcc', 'spIntPGOcc'))) {
-    stop("error: requires an output object of class spPGOcc or spIntPGOcc\n")
+    stop("requires an output object of class spPGOcc or spIntPGOcc\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
   
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))){
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
   X.0 <- as.matrix(X.0)
   if (missing(grid.index.0)) {
@@ -582,13 +583,13 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   # Occurrence predictions ------------------------------------------------
   if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
     n.post <- object$n.post * object$n.chains
@@ -609,7 +610,7 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       p.occ.re <- 0
     }
     if (ncol(X.0) != p.occ + p.occ.re){
-      stop(paste("error: X.0 must have ", p.occ + p.occ.re," columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.occ + p.occ.re," columns\n", sep = ''))
     }
     # Determine coordinates that have already been sampled
     match.indx <- match(do.call("paste", as.data.frame(coords.0)), do.call("paste", as.data.frame(coords)))
@@ -627,7 +628,7 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0.new) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0.new[, -indx, drop = FALSE])
@@ -902,20 +903,21 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))) {
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
+  X.0 <- as.matrix(X.0)
 
   # Occurrence predictions ------------------------------------------------
   if (tolower(type) == 'occupancy') {
@@ -925,7 +927,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.design <- p.occ + ncol(object$sigma.sq.psi.samples)
     }
     if (ncol(X.0) != p.design) {
-      stop(paste("error: X.0 must have ", p.design, " columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
     }
     # Composition sampling --------------------------------------------------
     if (is(object, 'intMsPGOcc')) {
@@ -951,7 +953,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -1012,7 +1014,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.design <- p.det + ncol(object$sigma.sq.p.samples)
     }
     if (ncol(X.0) != p.design) {
-      stop(paste("error: X.0 must have ", p.design, " columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
     }
     # Composition sampling --------------------------------------------------
     N <- dim(object$y)[1]
@@ -1033,7 +1035,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       x.p.re.names <- colnames(object$X.p.re)
       indx <- which(colnames(X.0) %in% x.p.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$det.covs")
+        stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -1257,12 +1259,12 @@ fitted.msPGOcc <- function(object, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
   # if (!is(object, c("msPGOcc", "spMsPGOcc", "lfMsPGOcc", "sfMsPGOcc"))) {
   if (!(class(object) %in% c('msPGOcc', 'spMsPGOcc', 'lfMsPGOcc', 'sfMsPGOcc', 
 			     'svcMsPGOcc'))) {
-    stop("error: object must be of class msPGOcc, spMsPGOcc, lfMsPGOcc, sfMsPGOcc, or svcMsPGOcc\n")
+    stop("object must be of class msPGOcc, spMsPGOcc, lfMsPGOcc, sfMsPGOcc, or svcMsPGOcc\n")
   }
   n.post <- object$n.post * object$n.chains
   X.p <- object$X.p
@@ -1503,24 +1505,25 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   if (!is(object, 'spMsPGOcc')) {
   # if (object != 'spMsPGOcc') {
-    stop("error: requires an output object of class spMsPGOcc\n")
+    stop("requires an output object of class spMsPGOcc\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))) {
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
+  X.0 <- as.matrix(X.0)
 
   ptm <- proc.time()
 
@@ -1546,18 +1549,18 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
     }
 
     if (ncol(X.0) != p.occ + p.occ.re){
-      stop(paste("error: X.0 must have ", p.occ + p.occ.re," columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.occ + p.occ.re," columns\n", sep = ''))
     }
     X.0 <- as.matrix(X.0)
 
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
 
@@ -1579,7 +1582,7 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0.new) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       # Random effect columns in predicted values
       X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
@@ -1786,10 +1789,10 @@ fitted.intPGOcc <- function(object, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
   if (!(class(object) %in% c('intPGOcc', 'spIntPGOcc'))) {
-    stop("error: object must be one of class intPGOcc or spIntPGOcc\n")
+    stop("object must be one of class intPGOcc or spIntPGOcc\n")
   }
 
   y <- object$y
@@ -2203,25 +2206,25 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   # if (!is(object, c('lfMsPGOcc', 'lfJSDM'))) {
   if (!(class(object) %in% c('lfMsPGOcc', 'lfJSDM'))) {
-    stop("error: requires an output object of class lfMsPGOcc or lfJSDM\n")
+    stop("requires an output object of class lfMsPGOcc or lfJSDM\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))) {
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
-
+  X.0 <- as.matrix(X.0)
   
   # Occurrence predictions ------------------------------------------------
   if (!include.w) {
@@ -2234,7 +2237,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
         p.design <- p.occ + ncol(object$sigma.sq.psi.samples)
       }
       if (ncol(X.0) != p.design) {
-        stop(paste("error: X.0 must have ", p.design, " columns\n", sep = ''))
+        stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
       }
       # Composition sampling --------------------------------------------------
       N <- dim(object$y)[1]
@@ -2264,7 +2267,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
       X.0.new <- X.0[coords.0.indx, , drop = FALSE]
 
       if (length(coords.indx) == nrow(X.0)) {
-        stop("error: no new locations to predict at. See object$psi.samples for occurrence probabilities at sampled sites.")
+        stop("no new locations to predict at. See object$psi.samples for occurrence probabilities at sampled sites.")
       }
 
       if (object$psiRE) {
@@ -2274,7 +2277,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
         x.re.names <- colnames(object$X.re)
         indx <- which(colnames(X.0.new) %in% x.re.names)
         if (length(indx) == 0) {
-          stop("error: column names in X.0 must match variable names in data$occ.covs")
+          stop("column names in X.0 must match variable names in data$occ.covs")
         }
         X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
         X.fix <- as.matrix(X.0.new[, -indx, drop = FALSE])
@@ -2551,23 +2554,24 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   # if (!is(object, c('sfMsPGOcc', 'sfJSDM'))) {
   if (!(class(object) %in% c('sfMsPGOcc', 'sfJSDM'))) {
-    stop("error: requires an output object of class sfMsPGOcc or sfJSDM\n")
+    stop("requires an output object of class sfMsPGOcc or sfJSDM\n")
   }
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))) {
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
+  X.0 <- as.matrix(X.0)
   # Check grid ------------------------------------------------------------
   if (missing(grid.index.0)) {
     grid.index.0 <- 1:nrow(X.0)
@@ -2604,18 +2608,18 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
     }
 
     if (ncol(X.0) != p.occ + p.occ.re){
-      stop(paste("error: X.0 must have ", p.occ + p.occ.re," columns\n"))
+      stop(paste("X.0 must have ", p.occ + p.occ.re," columns\n"))
     }
     X.0 <- as.matrix(X.0)
 
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
 
@@ -2632,7 +2636,7 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -3033,10 +3037,10 @@ fitted.stPGOcc <- function(object, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
   if (!(class(object) %in% c('tPGOcc', 'stPGOcc', 'svcTPGOcc'))) {
-    stop("error: object must be one of class tPGOcc or stPGOcc\n")
+    stop("object must be one of class tPGOcc or stPGOcc\n")
   }
   n.post <- object$n.post * object$n.chains
   X.p <- object$X.p
@@ -3103,22 +3107,22 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (length(dim(X.0)) != 3) {
-    stop("error: X.0 must be an array with three dimensions corresponding to site, time, and covariate")
+    stop("X.0 must be an array with three dimensions corresponding to site, time, and covariate")
   }
 
   if (missing(t.cols) & forecast == FALSE) {
-    stop("error: t.cols must be specified when forecast = FALSE\n")
+    stop("t.cols must be specified when forecast = FALSE\n")
   }
   if (missing(grid.index.0)) {
     grid.index.0 <- 1:nrow(X.0)
@@ -3128,13 +3132,13 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
   # Occurrence predictions ------------------------------------------------
   if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
     n.post <- object$n.post * object$n.chains
@@ -3166,7 +3170,7 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
       p.occ.re <- 0
     }
     if (dim(X.0)[3] != p.occ + p.occ.re){
-      stop(paste("error: the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
+      stop(paste("the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
     }
     # Eliminate prediction sites that have already sampled been for now
     match.indx <- match(do.call("paste", as.data.frame(coords.0)), do.call("paste", as.data.frame(coords)))
@@ -3181,7 +3185,7 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
       x.re.names <- dimnames(object$X.re)[[3]]
       indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: dimnames(X.0)[[3]] must match variable names in data$occ.covs")
+        stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
@@ -3256,7 +3260,7 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
     # Check if sampled sites are included and make sure predicting across
     # all years.
     # if ((nrow(coords.0) != q) & n.years.max != dim(object$X)[2]) {
-    #   stop("error: when predicting at sampled sites using stPGOcc, you must predict across all primary time periods")
+    #   stop("when predicting at sampled sites using stPGOcc, you must predict across all primary time periods")
     # }
 
     if (sp.type == 'GP') {
@@ -3350,21 +3354,21 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (length(dim(X.0)) != 3) {
-    stop("error: X.0 must be an array with three dimensions corresponding to site, time, and covariate")
+    stop("X.0 must be an array with three dimensions corresponding to site, time, and covariate")
   }
   if (missing(t.cols)) {
-    stop("error: t.cols must be specified\n")
+    stop("t.cols must be specified\n")
   }
 
   # Occurrence predictions ------------------------------------------------
@@ -3382,7 +3386,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.occ.re <- 0
     }
     if (dim(X.0)[3] != p.occ + p.occ.re){
-      stop(paste("error: the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
+      stop(paste("the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
     }
 
     if (object$psiRE & !ignore.RE) {
@@ -3392,7 +3396,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       x.re.names <- dimnames(object$X.re)[[3]]
       indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: dimnames(X.0)[[3]] must match variable names in data$occ.covs")
+        stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
@@ -3468,7 +3472,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.design <- p.det + ncol(object$sigma.sq.p.samples)
     }
     if (dim(X.0)[3] != p.design) {
-      stop(paste("error: the third dimension of X.0 must be ", p.design, "\n", sep = ''))
+      stop(paste("the third dimension of X.0 must be ", p.design, "\n", sep = ''))
     }
 
     # Composition sampling --------------------------------------------------
@@ -3488,7 +3492,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       x.p.re.names <- colnames(object$X.p.re)
       indx <- which(dimnames(X.0)[[3]] %in% x.p.re.names)
       if (length(indx) == 0) {
-        stop("error: dimnames(X.0)[[3]] must match variable names in data$det.covs")
+        stop("dimnames(X.0)[[3]] must match variable names in data$det.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
@@ -3588,21 +3592,21 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   if (!(class(object) %in% c('svcPGOcc', 'svcPGBinom'))) {
-    stop("error: requires an output object of class svcPGOcc or svcPGBinom\n")
+    stop("requires an output object of class svcPGOcc or svcPGBinom\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))){
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
   X.0 <- as.matrix(X.0)
   if (is(object, 'svcPGBinom')) {
@@ -3621,13 +3625,13 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
   # Occurrence predictions ------------------------------------------------
   if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
     n.post <- object$n.post * object$n.chains
@@ -3654,7 +3658,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       p.occ.re <- 0
     }
     if (ncol(X.0) != p.occ + p.occ.re){
-      stop(paste("error: X.0 must have ", p.occ + p.occ.re," columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.occ + p.occ.re," columns\n", sep = ''))
     }
     # Eliminate prediction sites that have already sampled been for now
     match.indx <- match(do.call("paste", as.data.frame(coords.0)), do.call("paste", as.data.frame(coords)))
@@ -3667,7 +3671,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
     # weights.0.new <- weights.0[coords.0.indx]
 
     # if (length(coords.indx) == nrow(X.0)) {
-    #   stop("error: no new locations to predict at. See object$psi.samples for occurrence probabilities at sampled sites.")
+    #   stop("no new locations to predict at. See object$psi.samples for occurrence probabilities at sampled sites.")
     # }
 
     if (object$psiRE & !ignore.RE) {
@@ -3677,7 +3681,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -3798,7 +3802,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       p.design <- p.det + ncol(object$sigma.sq.p.samples)
     }
     if (ncol(X.0) != p.design) {
-      stop(paste("error: X.0 must have ", p.design, " columns\n", sep = ''))
+      stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
     }
 
     # Composition sampling --------------------------------------------------
@@ -3818,7 +3822,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       x.p.re.names <- colnames(object$X.p.re)
       indx <- which(colnames(X.0) %in% x.p.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$det.covs")
+        stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -3928,22 +3932,22 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
   
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
   
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (length(dim(X.0)) != 3) {
-    stop("error: X.0 must be an array with three dimensions corresponding to site, time, and covariate")
+    stop("X.0 must be an array with three dimensions corresponding to site, time, and covariate")
   }
   
   if (missing(t.cols) & forecast == FALSE) {
-    stop("error: t.cols must be specified when forecast = FALSE")
+    stop("t.cols must be specified when forecast = FALSE")
   }
   
   if (is(object, 'svcTPGBinom')) {
@@ -3962,13 +3966,13 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
   # Occurrence predictions ------------------------------------------------
   if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
     n.post <- object$n.post * object$n.chains
@@ -4005,7 +4009,7 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
       p.occ.re <- 0
     }
     if (dim(X.0)[3] != p.occ + p.occ.re){
-      stop(paste("error: the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
+      stop(paste("the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
     }
     # Eliminate prediction sites that have already sampled been for now
     match.indx <- match(do.call("paste", as.data.frame(coords.0)), do.call("paste", as.data.frame(coords)))
@@ -4020,7 +4024,7 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
       x.re.names <- dimnames(object$X.re)[[3]]
       indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: dimnames(X.0)[[3]] must match variable names in data$occ.covs")
+        stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
@@ -4098,7 +4102,7 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
     # Check if sampled sites are included and make sure predicting across
     # all years.
     if ((sum(sites.0.sampled) > 0) & n.years.max != dim(object$X)[2]) {
-      stop("error: when predicting at sampled sites using svcTPGOcc, you must predict across all primary time periods")
+      stop("when predicting at sampled sites using svcTPGOcc, you must predict across all primary time periods")
     }
     
     # Currently predict is only implemented for NNGP.
@@ -4444,35 +4448,36 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   if (!(class(object) %in% c('svcMsPGOcc'))) {
-    stop("error: requires an output object of class svcMsPGOcc\n")
+    stop("requires an output object of class svcMsPGOcc\n")
   }
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (!any(is.data.frame(X.0), is.matrix(X.0))) {
-    stop("error: X.0 must be a data.frame or matrix\n")
+    stop("X.0 must be a data.frame or matrix\n")
   }
+  X.0 <- as.matrix(X.0) 
 
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
   if (tolower(type == 'occupancy')) {
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     n.post <- object$n.post * object$n.chains
     X <- object$X
@@ -4501,20 +4506,20 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
     }
 
     if (ncol(X.0) != p.occ + p.occ.re){
-      stop(paste("error: X.0 must have ", p.occ + p.occ.re," columns\n"))
+      stop(paste("X.0 must have ", p.occ + p.occ.re," columns\n"))
     }
     X.0 <- as.matrix(X.0)
     X.w.0 <- X.0[, svc.cols, drop = FALSE]
     X.w <- object$X.w
 
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     coords.0 <- as.matrix(coords.0)
 
@@ -4531,7 +4536,7 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       x.re.names <- colnames(object$X.re)
       indx <- which(colnames(X.0) %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: column names in X.0 must match variable names in data$occ.covs")
+        stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
       X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
@@ -4704,25 +4709,25 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
   if (!(class(object) %in% c('svcTMsPGOcc', 'stMsPGOcc'))) {
-    stop("error: requires an output object of class svcTMsPGOcc, stMsPGOcc\n")
+    stop("requires an output object of class svcTMsPGOcc, stMsPGOcc\n")
   }
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   # Check X.0 -------------------------------------------------------------
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (length(dim(X.0)) != 3) {
-    stop("error: X.0 must be an array with three dimensions corresponding to site, time, and covariate.")
+    stop("X.0 must be an array with three dimensions corresponding to site, time, and covariate.")
   }
 
   if (missing(t.cols)) {
-    stop("error: t.cols must be specified\n")
+    stop("t.cols must be specified\n")
   }
 
   if (missing(grid.index.0)) {
@@ -4735,13 +4740,13 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
   # Occurrence predictions ------------------------------------------------
   if (tolower(type == 'occupancy')) {
     if (missing(coords.0)) {
-      stop("error: coords.0 must be specified\n")
+      stop("coords.0 must be specified\n")
     }
     if (!any(is.data.frame(coords.0), is.matrix(coords.0))) {
-      stop("error: coords.0 must be a data.frame or matrix\n")
+      stop("coords.0 must be a data.frame or matrix\n")
     }
     if (!ncol(coords.0) == 2){
-      stop("error: coords.0 must have two columns\n")
+      stop("coords.0 must have two columns\n")
     }
     n.post <- object$n.post * object$n.chains
     X <- object$X
@@ -4897,7 +4902,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
     # Check if sampled sites are included and make sure predicting across
     # all years.
     if ((sum(sites.0.sampled) > 0) & n.years.max != dim(object$X)[2]) {
-      stop("error: when predicting at sampled sites using svcTPGOcc, you must predict across all primary time periods")
+      stop("when predicting at sampled sites using svcTPGOcc, you must predict across all primary time periods")
     }
 
     if (sp.type == 'GP') {
@@ -4999,10 +5004,10 @@ fitted.tMsPGOcc <- function(object, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
   if (!(class(object) %in% c('tMsPGOcc', 'stMsPGOcc', 'svcTMsPGOcc'))) {
-    stop("error: object must be of class tMsPGOcc, stMsPGOcc, svcTMsPGOcc\n")
+    stop("object must be of class tMsPGOcc, stMsPGOcc, svcTMsPGOcc\n")
   }
   n.post <- object$n.post * object$n.chains
   X.p <- object$X.p
@@ -5080,21 +5085,21 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
 
   # Some initial checks ---------------------------------------------------
   if (missing(object)) {
-    stop("error: predict expects object\n")
+    stop("predict expects object\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
-    stop("error: prediction type must be either 'occupancy' or 'detection'")
+    stop("prediction type must be either 'occupancy' or 'detection'")
   }
 
   if (missing(X.0)) {
-    stop("error: X.0 must be specified\n")
+    stop("X.0 must be specified\n")
   }
   if (length(dim(X.0)) != 3) {
-    stop("error: X.0 must be an array with three dimensions corresponding to site, time, and covariate")
+    stop("X.0 must be an array with three dimensions corresponding to site, time, and covariate")
   }
   if (missing(t.cols)) {
-    stop("error: t.cols must be specified\n")
+    stop("t.cols must be specified\n")
   }
 
   # Occurrence predictions ------------------------------------------------
@@ -5112,7 +5117,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.occ.re <- 0
     }
     if (dim(X.0)[3] != p.occ + p.occ.re){
-      stop(paste("error: the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
+      stop(paste("the third dimension of X.0 must be ", p.occ + p.occ.re,"\n", sep = ''))
     }
     # Composition sampling --------------------------------------------------
     N <- dim(object$y)[1]
@@ -5129,7 +5134,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       x.re.names <- dimnames(object$X.re)[[3]]
       indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
       if (length(indx) == 0) {
-        stop("error: dimnames(X.0)[[3]] must match variable names in data$occ.covs")
+        stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
@@ -5214,7 +5219,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.design <- p.det + ncol(object$sigma.sq.p.samples)
     }
     if (dim(X.0)[3] != p.design) {
-      stop(paste("error: the third dimension of X.0 must be ", p.design, "\n", sep = ''))
+      stop(paste("the third dimension of X.0 must be ", p.design, "\n", sep = ''))
     }
     # Composition sampling --------------------------------------------------
     N <- dim(object$y)[1]
@@ -5236,7 +5241,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       x.p.re.names <- colnames(object$X.p.re)
       indx <- which(dimnames(X.0)[[3]] %in% x.p.re.names)
       if (length(indx) == 0) {
-        stop("error: dimnames(X.0)[[3]] must match variable names in data$det.covs")
+        stop("dimnames(X.0)[[3]] must match variable names in data$det.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
@@ -5377,7 +5382,7 @@ fitted.tIntPGOcc <- function(object, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
 
   y <- object$y
