@@ -164,9 +164,9 @@ stPGOcc <- function(occ.formula, det.formula, data, inits, priors,
   data$det.covs <- data.frame(lapply(data$det.covs, function(a) unlist(c(a))))
   # Get detection covariates in site x year x replicate format
   if (nrow(data$det.covs) == dim(y)[1]) { # if only site-level covariates. 
-    data$det.covs <- as.data.frame(mapply(rep, data$det.covs, dim(y)[2] * dim(y)[3]))
+    data$det.covs <- as.data.frame(mapply(rep, data$det.covs, dim(y)[2] * dim(y)[3], SIMPLIFY = FALSE))
   } else if (nrow(data$det.covs) == dim(y)[1] * dim(y)[2]) { # if only site/year level covariates
-    data$det.covs <- as.data.frame(mapply(rep, data$det.covs, dim(y)[3]))
+    data$det.covs <- as.data.frame(mapply(rep, data$det.covs, dim(y)[3], SIMPLIFY = FALSE))
   }
   y.big <- y
   # Get occurrence covariates in proper format
@@ -180,7 +180,7 @@ stPGOcc <- function(occ.formula, det.formula, data, inits, priors,
   data$occ.covs <- data.frame(lapply(data$occ.covs, function(a) unlist(c(a))))
   # Check if only site-level covariates are included
   if (nrow(data$occ.covs) == dim(y)[1]) {
-    data$occ.covs <- as.data.frame(mapply(rep, data$occ.covs, dim(y)[2]))
+    data$occ.covs <- as.data.frame(mapply(rep, data$occ.covs, dim(y)[2], SIMPLIFY = FALSE))
   }
 
   # Checking missing values ---------------------------------------------

@@ -6,6 +6,7 @@
 + Fixed bug in prediction when a data frame was supplied to the `X.0` argument (PR 54, thanks to Juan Vargas Soto for pointing this out). 
 + Incorporated functionality in `updateMCMC()` for working with the `spAbundance::svcTIntAbund()` function.
 + Updated contact email in function docs. 
++ Fixed an error that occurred in very specific situations when running multi-season models. If all covariates in either the detection and/or occupancy portion of the model were site-level covariates, they were all supplied to the `data` list as a vector, and at least two of the covariates were of a different type (e.g., double vs. character) then the covariates would all get converted to a single type. This usually resulted in the situation when a continuous covariate was converted to a categorical covariate, which was then evident in the resulting model output. Thanks to José Ribeiro for bringing this to my attention (issue [#49](https://github.com/ecoverseR/spOccupancy/issues/49). 
 
 # spOccupancy 0.8.0
 

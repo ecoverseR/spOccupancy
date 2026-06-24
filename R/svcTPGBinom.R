@@ -118,7 +118,7 @@ svcTPGBinom <- function(formula, data, inits, priors,
   data$covs <- data.frame(lapply(data$covs, function(a) unlist(c(a))))
   # Check if only site-level covariates are included
   if (nrow(data$covs) == dim(y)[1]) {
-    data$covs <- as.data.frame(mapply(rep, data$covs, dim(y)[2]))
+    data$covs <- as.data.frame(mapply(rep, data$covs, dim(y)[2], SIMPLIFY = FALSE))
   }
 
   # Checking missing values ---------------------------------------------

@@ -120,9 +120,9 @@ tIntPGOcc <- function(occ.formula, det.formula, data, inits, priors, tuning,
     data$det.covs[[i]] <- data.frame(lapply(data$det.covs[[i]], function(a) unlist(c(a))))
     # Get detection covariates in site x year x replicate format
     if (nrow(data$det.covs[[i]]) == dim(y[[i]])[1]) { # if only site-level covariates. 
-      data$det.covs[[i]] <- as.data.frame(mapply(rep, data$det.covs[[i]], dim(y[[i]])[2] * dim(y[[i]])[3]))
+      data$det.covs[[i]] <- as.data.frame(mapply(rep, data$det.covs[[i]], dim(y[[i]])[2] * dim(y[[i]])[3], SIMPLIFY = FALSE))
     } else if (nrow(data$det.covs[[i]]) == dim(y[[i]])[1] * dim(y[[i]])[2]) { # if only site/year level covariates
-      data$det.covs[[i]] <- as.data.frame(mapply(rep, data$det.covs[[i]], dim(y[[i]])[3]))
+      data$det.covs[[i]] <- as.data.frame(mapply(rep, data$det.covs[[i]], dim(y[[i]])[3], SIMPLIFY = FALSE))
     }
     y.big[[i]] <- y[[i]]
   }
@@ -137,7 +137,7 @@ tIntPGOcc <- function(occ.formula, det.formula, data, inits, priors, tuning,
   data$occ.covs <- data.frame(lapply(data$occ.covs, function(a) unlist(c(a))))
   # Check if only site-level covariates are included
   if (nrow(data$occ.covs) == J) {
-    data$occ.covs <- as.data.frame(mapply(rep, data$occ.covs, n.years.total))
+    data$occ.covs <- as.data.frame(mapply(rep, data$occ.covs, n.years.total, SIMPLIFY = FALSE))
   }
 
   # Checking missing values ---------------------------------------------
