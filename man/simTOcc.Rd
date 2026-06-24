@@ -71,7 +71,7 @@ simTOcc(J.x, J.y, n.time, n.rep, n.rep.max, beta, alpha, sp.only = 0, trend = TR
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}, \cr
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}, \cr
 }
 
 \references{

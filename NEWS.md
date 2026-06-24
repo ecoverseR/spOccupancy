@@ -3,6 +3,9 @@
 + Fixed a bug in `stMsPGOcc()` and `svcTMsPGOcc()` that prevented the models from running when there was only 1 within-season replicate. Thanks to Kevin Lafferty for bringing this to my attention. 
 + Fixed a bug in cross-validation of integrated models that led to the function crashing in certain situations, particularly on Windows machines. Thanks to Frederico Martins for bringing this to my attention.
 + Fixed a bug in the `predict()` function for `svcPGOcc()` (e.g., `predict.svcPGOcc()`) when using the `grid.index` functionality. When using `predict()`, a warning message would be displayed saying that there was a mismatch in the lengths of different vectors. This was a problem that resulted in inaccurate predictions when using `svcPGOcc()` and specifying the resolution of the SVCs as something higher than the point locations using the `grid.index` functionality. If you did this, I strongly encourage you to rerun the functions with v0.8.1, and I apologize for the inconvience this caused. Thanks very much to Ben Goldstein for pointing this out. Note that this bug did not affect results if using `svcPGOcc()` without specifying `grid.index` in the data list (which is likely the vast majority of instances for when `svcPGOcc()` is used). 
++ Fixed bug in prediction when a data frame was supplied to the `X.0` argument (PR 54, thanks to Juan Vargas Soto for pointing this out). 
++ Incorporated functionality in `updateMCMC()` for working with the `spAbundance::svcTIntAbund()` function.
++ Updated contact email in function docs. 
 
 # spOccupancy 0.8.0
 
@@ -103,15 +106,15 @@ spOccupancy v0.5.0 contains numerous substantial updates that provide new functi
 + New functionality for fitting spatially-varying coefficient occupancy models. The function `svcPGOcc()` fits a single-season spatially-varying coefficient model, and `svcTPGOcc()` fits a multi-season spatially-varying coefficient model. We also include the functions `svcPGBinom()` and `svcTPGBinom()` for fitting spatially-varying coefficient generalized linear models when ignoring imperfect detection. We also include the helper function `getSVCSamples()` to more easily extract the SVC samples from the resulting model objects if they are desired.
 + Updated the underlying `C++` code to reduce run times for models that include unstructured random intercepts. 
 + Added the `k.fold.only` argument to all model-fitting functions, which allows users to only perform k-fold cross-validation instead of having to run the model first with the entire data set.
-+ Adjusted how random intercepts in the detection model were being calculated, which resulted in unnecessary massive objects when fitting a model with a large number of random effect levels and spatial locations. See [GitHub issue 14](https://github.com/biodiverse/spOccupancy/issues/14). 
-+ Fixed a bug that prevented prediction from working for multi-species models when `X.0` was supplied as a data frame and not a matrix. See [GitHub issue 13](https://github.com/biodiverse/spOccupancy/issues/13).
-+ Fixed an error that occurred when the detection-nondetection data were specified in a specific way. See [GitHub issue 12](https://github.com/biodiverse/spOccupancy/issues/12).
++ Adjusted how random intercepts in the detection model were being calculated, which resulted in unnecessary massive objects when fitting a model with a large number of random effect levels and spatial locations. See [GitHub issue 14](https://github.com/ecoverseR/spOccupancy/issues/14). 
++ Fixed a bug that prevented prediction from working for multi-species models when `X.0` was supplied as a data frame and not a matrix. See [GitHub issue 13](https://github.com/ecoverseR/spOccupancy/issues/13).
++ Fixed an error that occurred when the detection-nondetection data were specified in a specific way. See [GitHub issue 12](https://github.com/ecoverseR/spOccupancy/issues/12).
 
 
 # spOccupancy 0.4.0
 
 + Major new functionality for fitting multi-season (i.e., spatio-temporal) single-species occupancy models using the functions `tPGOcc()` and `stPGOcc()`. 
-+ Fixed a bug in calculation of the detection probability values in `fitted()` functions for all spOccupancy model objects. See [this Github issue](https://github.com/biodiverse/spOccupancy/issues/10) for more details. 
++ Fixed a bug in calculation of the detection probability values in `fitted()` functions for all spOccupancy model objects. See [this Github issue](https://github.com/ecoverseR/spOccupancy/issues/10) for more details. 
 + Fixed an error that occurred when predicting for multi-species models and setting `ignore.RE = TRUE`.  
 + Fixed other small bugs that caused model fitting functions to break under specific circumstances.
 
@@ -125,7 +128,7 @@ spOccupancy v0.5.0 contains numerous substantial updates that provide new functi
 
 # spOccupancy 0.3.1
 
-+ Fixed two small problems with `intPGOcc()` and `spIntPGOcc()` that were accidentally introduced in v0.3.0. See [this Github issue](https://github.com/biodiverse/spOccupancy/issues/8) for more details.
++ Fixed two small problems with `intPGOcc()` and `spIntPGOcc()` that were accidentally introduced in v0.3.0. See [this Github issue](https://github.com/ecoverseR/spOccupancy/issues/8) for more details.
 + Adapted C/C++ code to properly handle characters strings when calling Fortran BLAS/LAPACK routines following the new requirements for R 4.2.0.  
 
 # spOccupancy 0.3.0

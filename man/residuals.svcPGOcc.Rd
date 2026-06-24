@@ -23,7 +23,7 @@
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}
 }
 
 

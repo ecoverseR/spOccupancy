@@ -71,7 +71,7 @@ simTIntOcc(n.data, J.x, J.y, J.obs, n.time, data.seasons, n.rep, n.rep.max,
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}
 }
 
 \value{

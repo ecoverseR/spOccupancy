@@ -188,7 +188,7 @@ Function for fitting single-species multi-season spatial integrated occupancy mo
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}
 }
 
 \value{

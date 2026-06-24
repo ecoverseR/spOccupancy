@@ -210,7 +210,7 @@ Function for fitting single-species multi-season spatially-varying coefficient i
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}
 }
 
 \value{

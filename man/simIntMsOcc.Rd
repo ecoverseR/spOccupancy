@@ -60,7 +60,7 @@ simIntMsOcc(n.data, J.x, J.y, J.obs, n.rep, n.rep.max, N, beta, alpha, psi.RE = 
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}, \cr
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}, \cr
 }
 
 \references{

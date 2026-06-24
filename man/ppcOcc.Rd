@@ -34,7 +34,7 @@ column (replicate).}
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}, \cr
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}, \cr
 }
 
 \value{

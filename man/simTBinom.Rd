@@ -57,7 +57,7 @@ simTBinom(J.x, J.y, n.time, weights, beta, sp.only = 0,
 }
 
 \author{
-  Jeffrey W. Doser \email{doserjef@msu.edu}, \cr
+  Jeffrey W. Doser \email{jwdoser@ncsu.edu}, \cr
   Andrew O. Finley \email{finleya@msu.edu}
 }
 

@@ -13,9 +13,9 @@ LazyData: true
 RoxygenNote: 7.1.1
 URL: https://www.doserlab.com/files/spoccupancy-web,
         https://groups.google.com/g/spocc-spabund-users,
-        https://github.com/biodiverse/spOccupancy
-BugReports: https://github.com/biodiverse/spOccupancy/issues
+        https://github.com/ecoverseR/spOccupancy
+BugReports: https://github.com/ecoverseR/spOccupancy/issues
 Depends: R (>= 3.5.0)
-Imports: stats, coda, abind, RANN, lme4, foreach, doParallel, spAbundance, methods
+Imports: stats, coda, abind, RANN, reformulas, foreach, doParallel, spAbundance, methods
 Suggests: testthat
 NeedsCompilation: yes
