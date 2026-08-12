@@ -17,17 +17,24 @@ updateMCMC <- function(object, n.batch, n.samples, n.burn = 0, n.thin,
   if (missing(object)) {
     stop("error: object must be specified")
   }
-  # TODO: temporary check until the function is implemented for all 
-  #.      spOccupancy and spAbundance model types
-  if (!class(object) %in% c('sfJSDM', 'msAbund', 'lfJSDM', 'svcTIntAbund')) {
-    stop("updateMCMC() is currently only implemented for sfJSDM, lfJSDM, msAbund, svcTIntAbund model types.")
+  # TODO: clean up. 
+  # if (!class(object) %in% c('sfJSDM', 'msAbund', 'lfJSDM', 'svcTIntAbund')) {
+  #   stop("updateMCMC() is currently only implemented for sfJSDM, lfJSDM, msAbund, svcTIntAbund model types.")
+  # }
+  if (!class(object) %in% c('sfJSDM', 'msAbund', 'lfJSDM')) {
+    stop("updateMCMC() is currently only implemented for sfJSDM, lfJSDM, msAbund model types.")
   }
   if (missing(n.batch)) {
+    # if (class(object) %in% c('spPGOcc', 'spMsPGOcc', 'spIntPGOcc', 
+    #                          'sfMsPGOcc', 'sfJSDM', 'tPGOcc', 'stPGOcc', 
+    #                          'svcPGOcc', 'svcPGBinom', 'svcMsPGBinom', 
+    #                          'svcTPGOcc', 'svcTPGBinom', 'svcMsPGOcc', 
+    #                          'svcTMsPGOcc', 'svcTIntPGOcc', 'msAbund', 'svcTIntAbund')) {
     if (class(object) %in% c('spPGOcc', 'spMsPGOcc', 'spIntPGOcc', 
                              'sfMsPGOcc', 'sfJSDM', 'tPGOcc', 'stPGOcc', 
                              'svcPGOcc', 'svcPGBinom', 'svcMsPGBinom', 
                              'svcTPGOcc', 'svcTPGBinom', 'svcMsPGOcc', 
-                             'svcTMsPGOcc', 'svcTIntPGOcc', 'msAbund', 'svcTIntAbund')) {
+                             'svcTMsPGOcc', 'svcTIntPGOcc', 'msAbund')) {
       n.batch <- object$update$n.batch
     }
   }
@@ -222,275 +229,276 @@ updateMCMC <- function(object, n.batch, n.samples, n.burn = 0, n.thin,
     object$update$final.seed <- seeds.new
     object$update$n.batch <- n.batch + object$update$n.batch
   }
+  # TODO: needs to be implemented. 
   # svcTIntAbund ----------------------------------------------------------
-  if (is(object, 'svcTIntAbund')) {
-    for (i in 1:n.chains) {
-      # Set the random seed based on the previous set of the model
-      assign(".Random.seed", object$update$final.seed[[i]], .GlobalEnv)
-      p.abund <- ncol(object$beta.samples)
-      p.det <- ncol(object$alpha.samples)
-      p.svc <- length(object$svc.cols)
-      n.data <- length(object$y)
-      J <- nrow(object$coords)
-      cov.model.indx <- object$cov.model.indx
-      cov.model.names <- c("exponential", "spherical", "matern", "gaussian")
-      cov.model <- cov.model.names[cov.model.indx + 1]
-      # Get initial values
-      curr.inits <- n.post.one.chain * i
-      inits <- list()
-      # beta, alpha, phi, sigma.sq, nu, w, sigma.sq.mu, sigma.sq.p, beta.star, 
-      # alpha.star, kappa
-      inits$beta <- object$beta.samples[curr.inits, ]
-      alpha.inits.long <- object$alpha.samples[curr.inits, ]
-      inits$alpha <- list()
-      curr.alpha <- 1
-      for (l in 1:n.data) {
-        alpha.indx <- curr.alpha:(curr.alpha + ncol(object$X.p[[l]]) - 1) 
-        inits$alpha[[l]] <- alpha.inits.long[alpha.indx]
-        curr.alpha <- max(alpha.indx) + 1
-      }
-      inits$sigma.sq <- object$theta.samples[curr.inits, 1:p.svc]
-      inits$phi <- object$theta.samples[curr.inits, (p.svc + 1):(2 * p.svc)]
-      if (cov.model == 'matern') {
-        inits$nu <- object$theta.samples[curr.inits, (p.svc * 2 + 1):(3 * p.svc)]
-      }
-      inits$w <- matrix(object$w.samples[curr.inits, , ], p.svc, J)
-      if (object$muRE) {
-        inits$sigma.sq.mu <- object$sigma.sq.mu.samples[curr.inits, ]
-        inits$beta.star <- object$beta.star.samples[curr.inits, ] 
-      }
-      if (object$pRE) {
-        inits$sigma.sq.p <- object$sigma.sq.p.samples[curr.inits, ]
-        inits$alpha.star <- object$alpha.star.samples[curr.inits, ] 
-      }
-      if (any(object$dist == 'NB')) {
-        inits$kappa <- object$kappa.samples[curr.inits, ]
-      }
-      # Get tuning values
-      tuning <- list()
-      beta.tuning.indx <- 1:ncol(object$beta.samples)
-      alpha.start <- max(beta.tuning.indx) + 1
-      alpha.tuning.indx <- alpha.start:(alpha.start + ncol(object$alpha.samples) - 1)
-      sigma.sq.start <- max(alpha.tuning.indx) + 1
-      sigma.sq.tuning.indx <- sigma.sq.start:(sigma.sq.start + p.svc - 1)
-      phi.start <- max(sigma.sq.tuning.indx) + 1
-      phi.tuning.indx <- phi.start:(phi.start + p.svc - 1)
-      if (cov.model == 'matern') {
-        nu.start <- max(phi.tuning.indx) + 1
-        nu.tuning.indx <- nu.start:(nu.start + p.svc - 1)
-        w.start <- max(nu.tuning.indx) + 1
-      } else {
-        w.start <- max(phi.tuning.indx) + 1
-      }
-      w.tuning.indx <- w.start:(w.start + p.svc * J - 1)
-      if (object$muRE) {
-        beta.star.start <- max(w.tuning.indx) + 1
-        beta.star.tuning.indx <- beta.star.start:(beta.star.start + ncol(object$beta.star.samples) - 1)
-      } else {
-        beta.star.tuning.indx <- w.tuning.indx
-      }
-      if (object$pRE) {
-        alpha.star.start <- max(beta.star.tuning.indx) + 1
-        alpha.star.tuning.indx <- alpha.star.start:(alpha.star.start + ncol(object$alpha.star.samples) - 1)
-      } else {
-        alpha.star.tuning.indx <- beta.star.tuning.indx
-      }
-      if (any(object$dist == 'NB')) {
-        kappa.start <- max(alpha.star.tuning.indx) + 1
-        kappa.tuning.indx <- kappa.start:(kappa.start + ncol(object$kappa.samples) - 1)
-      }
-      tuning$beta <- object$update$tuning[beta.tuning.indx, i]
-      tuning$alpha <- object$update$tuning[alpha.tuning.indx, i]
-      tuning$sigma.sq <- object$update$tuning[sigma.sq.tuning.indx, i]
-      tuning$phi <- object$update$tuning[phi.tuning.indx, i]
-      if (cov.model == 'matern') {
-        tuning$nu <- object$update$tuning[nu.tuning.indx, i]
-      }
-      tuning$w <- object$update$tuning[w.tuning.indx, i]
-      if (object$muRE) {
-        tuning$beta.star <- object$update$tuning[beta.star.tuning.indx, i]
-      }
-      if (object$pRE) {
-        tuning$alpha.star <- object$update$tuning[alpha.star.tuning.indx, i]
-      }
-      if (any(object$dist == 'NB')) {
-        tuning$kappa <- object$update$tuning[kappa.tuning.indx, i]
-      }
-      # TODO: note that the output isn't going to look great, but just gotta
-      #       deal with that for now.
-      out.tmp[[i]] <- svcTIntAbund(abund.formula = object$update$abund.formula, 
-                                   det.formula = object$update$det.formula, 
-                                   data = object$update$data, 
-                                   inits = inits, 
-                                   priors = object$update$priors, 
-                                   tuning = tuning, 
-                                   svc.cols = object$svc.cols, 
-                                   cov.model = cov.model, 
-                                   NNGP = TRUE, 
-                                   n.neighbors = object$n.neighbors,
-                                   search.type = 'cb', 
-                                   n.batch = n.batch, 
-                                   family = object$dist, 
-                                   batch.length = object$update$batch.length, 
-                                   accept.rate = object$update$accept.rate, 
-                                   n.omp.threads = object$update$n.omp.threads,
-                                   verbose = verbose, 
-                                   n.report = n.report, 
-                                   n.burn = n.burn, 
-                                   n.thin = n.thin, 
-                                   save.fitted = save.fitted, 
-                                   n.chains = 1)
-      run.time.new <- run.time.new + out.tmp[[i]]$run.time
-      seeds.new[[i]] <- out.tmp[[i]]$update$final.seed[[1]]
-    }
-    # Put everything together
-    beta.samples.new <- list()
-    alpha.samples.new <- list()
-    theta.samples.new <- list()
-    w.samples.new <- list()
-    if (any(object$dist == 'NB')) {
-      kappa.samples.new <- list()
-    }
-    sigma.sq.mu.samples.new <- list()
-    beta.star.samples.new <- list()
-    sigma.sq.p.samples.new <- list()
-    alpha.star.samples.new <- list()
-    mu.samples.new <- list()
-    y.rep.samples.new <- list()
-    like.samples.new <- list()
+  # if (is(object, 'svcTIntAbund')) {
+  #   for (i in 1:n.chains) {
+  #     # Set the random seed based on the previous set of the model
+  #     assign(".Random.seed", object$update$final.seed[[i]], .GlobalEnv)
+  #     p.abund <- ncol(object$beta.samples)
+  #     p.det <- ncol(object$alpha.samples)
+  #     p.svc <- length(object$svc.cols)
+  #     n.data <- length(object$y)
+  #     J <- nrow(object$coords)
+  #     cov.model.indx <- object$cov.model.indx
+  #     cov.model.names <- c("exponential", "spherical", "matern", "gaussian")
+  #     cov.model <- cov.model.names[cov.model.indx + 1]
+  #     # Get initial values
+  #     curr.inits <- n.post.one.chain * i
+  #     inits <- list()
+  #     # beta, alpha, phi, sigma.sq, nu, w, sigma.sq.mu, sigma.sq.p, beta.star, 
+  #     # alpha.star, kappa
+  #     inits$beta <- object$beta.samples[curr.inits, ]
+  #     alpha.inits.long <- object$alpha.samples[curr.inits, ]
+  #     inits$alpha <- list()
+  #     curr.alpha <- 1
+  #     for (l in 1:n.data) {
+  #       alpha.indx <- curr.alpha:(curr.alpha + ncol(object$X.p[[l]]) - 1) 
+  #       inits$alpha[[l]] <- alpha.inits.long[alpha.indx]
+  #       curr.alpha <- max(alpha.indx) + 1
+  #     }
+  #     inits$sigma.sq <- object$theta.samples[curr.inits, 1:p.svc]
+  #     inits$phi <- object$theta.samples[curr.inits, (p.svc + 1):(2 * p.svc)]
+  #     if (cov.model == 'matern') {
+  #       inits$nu <- object$theta.samples[curr.inits, (p.svc * 2 + 1):(3 * p.svc)]
+  #     }
+  #     inits$w <- matrix(object$w.samples[curr.inits, , ], p.svc, J)
+  #     if (object$muRE) {
+  #       inits$sigma.sq.mu <- object$sigma.sq.mu.samples[curr.inits, ]
+  #       inits$beta.star <- object$beta.star.samples[curr.inits, ] 
+  #     }
+  #     if (object$pRE) {
+  #       inits$sigma.sq.p <- object$sigma.sq.p.samples[curr.inits, ]
+  #       inits$alpha.star <- object$alpha.star.samples[curr.inits, ] 
+  #     }
+  #     if (any(object$dist == 'NB')) {
+  #       inits$kappa <- object$kappa.samples[curr.inits, ]
+  #     }
+  #     # Get tuning values
+  #     tuning <- list()
+  #     beta.tuning.indx <- 1:ncol(object$beta.samples)
+  #     alpha.start <- max(beta.tuning.indx) + 1
+  #     alpha.tuning.indx <- alpha.start:(alpha.start + ncol(object$alpha.samples) - 1)
+  #     sigma.sq.start <- max(alpha.tuning.indx) + 1
+  #     sigma.sq.tuning.indx <- sigma.sq.start:(sigma.sq.start + p.svc - 1)
+  #     phi.start <- max(sigma.sq.tuning.indx) + 1
+  #     phi.tuning.indx <- phi.start:(phi.start + p.svc - 1)
+  #     if (cov.model == 'matern') {
+  #       nu.start <- max(phi.tuning.indx) + 1
+  #       nu.tuning.indx <- nu.start:(nu.start + p.svc - 1)
+  #       w.start <- max(nu.tuning.indx) + 1
+  #     } else {
+  #       w.start <- max(phi.tuning.indx) + 1
+  #     }
+  #     w.tuning.indx <- w.start:(w.start + p.svc * J - 1)
+  #     if (object$muRE) {
+  #       beta.star.start <- max(w.tuning.indx) + 1
+  #       beta.star.tuning.indx <- beta.star.start:(beta.star.start + ncol(object$beta.star.samples) - 1)
+  #     } else {
+  #       beta.star.tuning.indx <- w.tuning.indx
+  #     }
+  #     if (object$pRE) {
+  #       alpha.star.start <- max(beta.star.tuning.indx) + 1
+  #       alpha.star.tuning.indx <- alpha.star.start:(alpha.star.start + ncol(object$alpha.star.samples) - 1)
+  #     } else {
+  #       alpha.star.tuning.indx <- beta.star.tuning.indx
+  #     }
+  #     if (any(object$dist == 'NB')) {
+  #       kappa.start <- max(alpha.star.tuning.indx) + 1
+  #       kappa.tuning.indx <- kappa.start:(kappa.start + ncol(object$kappa.samples) - 1)
+  #     }
+  #     tuning$beta <- object$update$tuning[beta.tuning.indx, i]
+  #     tuning$alpha <- object$update$tuning[alpha.tuning.indx, i]
+  #     tuning$sigma.sq <- object$update$tuning[sigma.sq.tuning.indx, i]
+  #     tuning$phi <- object$update$tuning[phi.tuning.indx, i]
+  #     if (cov.model == 'matern') {
+  #       tuning$nu <- object$update$tuning[nu.tuning.indx, i]
+  #     }
+  #     tuning$w <- object$update$tuning[w.tuning.indx, i]
+  #     if (object$muRE) {
+  #       tuning$beta.star <- object$update$tuning[beta.star.tuning.indx, i]
+  #     }
+  #     if (object$pRE) {
+  #       tuning$alpha.star <- object$update$tuning[alpha.star.tuning.indx, i]
+  #     }
+  #     if (any(object$dist == 'NB')) {
+  #       tuning$kappa <- object$update$tuning[kappa.tuning.indx, i]
+  #     }
+  #     # TODO: note that the output isn't going to look great, but just gotta
+  #     #       deal with that for now.
+  #     out.tmp[[i]] <- svcTIntAbund(abund.formula = object$update$abund.formula, 
+  #                                  det.formula = object$update$det.formula, 
+  #                                  data = object$update$data, 
+  #                                  inits = inits, 
+  #                                  priors = object$update$priors, 
+  #                                  tuning = tuning, 
+  #                                  svc.cols = object$svc.cols, 
+  #                                  cov.model = cov.model, 
+  #                                  NNGP = TRUE, 
+  #                                  n.neighbors = object$n.neighbors,
+  #                                  search.type = 'cb', 
+  #                                  n.batch = n.batch, 
+  #                                  family = object$dist, 
+  #                                  batch.length = object$update$batch.length, 
+  #                                  accept.rate = object$update$accept.rate, 
+  #                                  n.omp.threads = object$update$n.omp.threads,
+  #                                  verbose = verbose, 
+  #                                  n.report = n.report, 
+  #                                  n.burn = n.burn, 
+  #                                  n.thin = n.thin, 
+  #                                  save.fitted = save.fitted, 
+  #                                  n.chains = 1)
+  #     run.time.new <- run.time.new + out.tmp[[i]]$run.time
+  #     seeds.new[[i]] <- out.tmp[[i]]$update$final.seed[[1]]
+  #   }
+  #   # Put everything together
+  #   beta.samples.new <- list()
+  #   alpha.samples.new <- list()
+  #   theta.samples.new <- list()
+  #   w.samples.new <- list()
+  #   if (any(object$dist == 'NB')) {
+  #     kappa.samples.new <- list()
+  #   }
+  #   sigma.sq.mu.samples.new <- list()
+  #   beta.star.samples.new <- list()
+  #   sigma.sq.p.samples.new <- list()
+  #   alpha.star.samples.new <- list()
+  #   mu.samples.new <- list()
+  #   y.rep.samples.new <- list()
+  #   like.samples.new <- list()
 
-    rhat.new <- list()
-    ess.new <- list()
-    n.samples.one.chain <- object$n.post
-    for (i in 1:n.chains) {
-      if (keep.orig) {
-        beta.samples.new[[i]] <- rbind(object$beta.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$beta.samples)
-        alpha.samples.new[[i]] <- rbind(object$alpha.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$alpha.samples)
-        theta.samples.new[[i]] <- rbind(object$theta.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$theta.samples)
-        w.samples.new[[i]] <- abind(object$w.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , , drop = FALSE], out.tmp[[i]]$w.samples, along = 1)
-        if (object$muRE) {
-          sigma.sq.mu.samples.new[[i]] <- rbind(object$sigma.sq.mu.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$sigma.sq.mu.samples)
-          beta.star.samples.new[[i]] <- rbind(object$beta.star.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$beta.star.samples)
-        }
-        if (object$pRE) {
-          sigma.sq.p.samples.new[[i]] <- rbind(object$sigma.sq.p.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$sigma.sq.p.samples)
-          alpha.star.samples.new[[i]] <- rbind(object$alpha.star.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$alpha.star.samples)
-        }
-        if (any(object$dist == 'NB')) {
-          kappa.samples.new[[i]] <- rbind(object$kappa.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$kappa.samples)
-        }
-        mu.samples.new[[i]] <- abind(object$mu.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , , drop = FALSE], out.tmp[[i]]$mu.samples, along = 1)
-        # TODO: will need to shift this at some point to an array like structure as above. 
-        like.samples.new[[i]] <- rbind(object$like.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$like.samples)
-        y.rep.samples.new[[i]] <- rbind(object$y.rep.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$y.rep.samples)
-      } else {
-        beta.samples.new[[i]] <- out.tmp[[i]]$beta.samples
-        alpha.samples.new[[i]] <- out.tmp[[i]]$alpha.samples
-        theta.samples.new[[i]] <- out.tmp[[i]]$theta.samples
-        w.samples.new[[i]] <- out.tmp[[i]]$w.samples
-        if (any(object$dist == 'NB')) {
-          kappa.samples.new[[i]] <- out.tmp[[i]]$kappa.samples
-        }
-	      if (object$muRE) {
-          sigma.sq.mu.samples.new[[i]] <- out.tmp[[i]]$sigma.sq.mu.samples
-          beta.star.samples.new[[i]] <- out.tmp[[i]]$beta.star.samples
-	      }
-	      if (object$pRE) {
-          sigma.sq.p.samples.new[[i]] <- out.tmp[[i]]$sigma.sq.p.samples
-          alpha.star.samples.new[[i]] <- out.tmp[[i]]$alpha.star.samples
-	      }
-        mu.samples.new[[i]] <- out.tmp[[i]]$mu.samples
-        y.rep.samples.new[[i]] <- out.tmp[[i]]$y.rep.samples
-        like.samples.new[[i]] <- out.tmp[[i]]$like.samples
-      }
-    }
-    # Update Gelman-Rubin diagnostics. 
-    if (n.chains > 1) {
-      # as.vector removes the "Upper CI" when there is only 1 variable. 
-      rhat.new$beta <- as.vector(gelman.diag(mcmc.list(lapply(beta.samples.new, function(a) 
-        					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
-      rhat.new$alpha <- as.vector(gelman.diag(mcmc.list(lapply(alpha.samples.new, function(a) 
-        					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
-      rhat.new$theta <- as.vector(gelman.diag(mcmc.list(lapply(theta.samples.new, function(a) 
-        					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
-      if (any(object$dist == 'NB')) {
-        rhat.new$kappa <- gelman.diag(mcmc.list(lapply(kappa.samples.new, function(a) 
-        					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2]
-      }
-      if (object$muRE) {
-        rhat.new$sigma.sq.mu <- as.vector(gelman.diag(mcmc.list(lapply(sigma.sq.mu.samples.new, function(a) 
-        					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
-      }
-      if (object$pRE) {
-        rhat.new$sigma.sq.p <- as.vector(gelman.diag(mcmc.list(lapply(sigma.sq.p.samples.new, function(a) 
-        					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
-      }
-    } else {
-      rhat.new$beta <- rep(NA, p.abund)
-      rhat.new$alpha <- rep(NA, p.det)
-      rhat.new$theta <- rep(NA, ncol(object$theta.samples))
-      if (any(object$dist == 'NB')) {
-        rhat.new$kappa <- rep(NA, n.data)
-      }
-      if (object$muRE > 0) {
-        rhat.new$sigma.sq.mu <- rep(NA, ncol(object$sigma.sq.mu.samples))
-      }
-      if (object$pRE > 0) {
-        rhat.new$sigma.sq.p <- rep(NA, ncol(object$sigma.sq.p.samples))
-      }
-    }
-    object$rhat <- rhat.new
+  #   rhat.new <- list()
+  #   ess.new <- list()
+  #   n.samples.one.chain <- object$n.post
+  #   for (i in 1:n.chains) {
+  #     if (keep.orig) {
+  #       beta.samples.new[[i]] <- rbind(object$beta.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$beta.samples)
+  #       alpha.samples.new[[i]] <- rbind(object$alpha.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$alpha.samples)
+  #       theta.samples.new[[i]] <- rbind(object$theta.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$theta.samples)
+  #       w.samples.new[[i]] <- abind(object$w.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , , drop = FALSE], out.tmp[[i]]$w.samples, along = 1)
+  #       if (object$muRE) {
+  #         sigma.sq.mu.samples.new[[i]] <- rbind(object$sigma.sq.mu.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$sigma.sq.mu.samples)
+  #         beta.star.samples.new[[i]] <- rbind(object$beta.star.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$beta.star.samples)
+  #       }
+  #       if (object$pRE) {
+  #         sigma.sq.p.samples.new[[i]] <- rbind(object$sigma.sq.p.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$sigma.sq.p.samples)
+  #         alpha.star.samples.new[[i]] <- rbind(object$alpha.star.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$alpha.star.samples)
+  #       }
+  #       if (any(object$dist == 'NB')) {
+  #         kappa.samples.new[[i]] <- rbind(object$kappa.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$kappa.samples)
+  #       }
+  #       mu.samples.new[[i]] <- abind(object$mu.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , , drop = FALSE], out.tmp[[i]]$mu.samples, along = 1)
+  #       # TODO: will need to shift this at some point to an array like structure as above. 
+  #       like.samples.new[[i]] <- rbind(object$like.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$like.samples)
+  #       y.rep.samples.new[[i]] <- rbind(object$y.rep.samples[((i - 1) * n.samples.one.chain + 1):(i * n.samples.one.chain), , drop = FALSE], out.tmp[[i]]$y.rep.samples)
+  #     } else {
+  #       beta.samples.new[[i]] <- out.tmp[[i]]$beta.samples
+  #       alpha.samples.new[[i]] <- out.tmp[[i]]$alpha.samples
+  #       theta.samples.new[[i]] <- out.tmp[[i]]$theta.samples
+  #       w.samples.new[[i]] <- out.tmp[[i]]$w.samples
+  #       if (any(object$dist == 'NB')) {
+  #         kappa.samples.new[[i]] <- out.tmp[[i]]$kappa.samples
+  #       }
+	#       if (object$muRE) {
+  #         sigma.sq.mu.samples.new[[i]] <- out.tmp[[i]]$sigma.sq.mu.samples
+  #         beta.star.samples.new[[i]] <- out.tmp[[i]]$beta.star.samples
+	#       }
+	#       if (object$pRE) {
+  #         sigma.sq.p.samples.new[[i]] <- out.tmp[[i]]$sigma.sq.p.samples
+  #         alpha.star.samples.new[[i]] <- out.tmp[[i]]$alpha.star.samples
+	#       }
+  #       mu.samples.new[[i]] <- out.tmp[[i]]$mu.samples
+  #       y.rep.samples.new[[i]] <- out.tmp[[i]]$y.rep.samples
+  #       like.samples.new[[i]] <- out.tmp[[i]]$like.samples
+  #     }
+  #   }
+  #   # Update Gelman-Rubin diagnostics. 
+  #   if (n.chains > 1) {
+  #     # as.vector removes the "Upper CI" when there is only 1 variable. 
+  #     rhat.new$beta <- as.vector(gelman.diag(mcmc.list(lapply(beta.samples.new, function(a) 
+  #       					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
+  #     rhat.new$alpha <- as.vector(gelman.diag(mcmc.list(lapply(alpha.samples.new, function(a) 
+  #       					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
+  #     rhat.new$theta <- as.vector(gelman.diag(mcmc.list(lapply(theta.samples.new, function(a) 
+  #       					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
+  #     if (any(object$dist == 'NB')) {
+  #       rhat.new$kappa <- gelman.diag(mcmc.list(lapply(kappa.samples.new, function(a) 
+  #       					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2]
+  #     }
+  #     if (object$muRE) {
+  #       rhat.new$sigma.sq.mu <- as.vector(gelman.diag(mcmc.list(lapply(sigma.sq.mu.samples.new, function(a) 
+  #       					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
+  #     }
+  #     if (object$pRE) {
+  #       rhat.new$sigma.sq.p <- as.vector(gelman.diag(mcmc.list(lapply(sigma.sq.p.samples.new, function(a) 
+  #       					      mcmc(a))), autoburnin = FALSE, multivariate = FALSE)$psrf[, 2])
+  #     }
+  #   } else {
+  #     rhat.new$beta <- rep(NA, p.abund)
+  #     rhat.new$alpha <- rep(NA, p.det)
+  #     rhat.new$theta <- rep(NA, ncol(object$theta.samples))
+  #     if (any(object$dist == 'NB')) {
+  #       rhat.new$kappa <- rep(NA, n.data)
+  #     }
+  #     if (object$muRE > 0) {
+  #       rhat.new$sigma.sq.mu <- rep(NA, ncol(object$sigma.sq.mu.samples))
+  #     }
+  #     if (object$pRE > 0) {
+  #       rhat.new$sigma.sq.p <- rep(NA, ncol(object$sigma.sq.p.samples))
+  #     }
+  #   }
+  #   object$rhat <- rhat.new
 
-    object$beta.samples <- mcmc(do.call(rbind, beta.samples.new))
-    object$alpha.samples <- mcmc(do.call(rbind, alpha.samples.new))
-    object$theta.samples <- mcmc(do.call(rbind, theta.samples.new))
-    if (any(object$dist == 'NB')) {
-      object$kappa.samples <- mcmc(do.call(rbind, kappa.samples.new))
-    }
-    if (object$muRE) {
-      object$sigma.sq.mu.samples <- mcmc(do.call(rbind, sigma.sq.mu.samples.new))
-      object$beta.star.samples <- mcmc(do.call(rbind, beta.star.samples.new))
-    }
-    if (object$pRE) {
-      object$sigma.sq.p.samples <- mcmc(do.call(rbind, sigma.sq.p.samples.new))
-      object$alpha.star.samples <- mcmc(do.call(rbind, alpha.star.samples.new))
-    }
-    object$w.samples <- do.call(abind, list('...' = w.samples.new, 
-                                 along = 1))
-    object$mu.samples <- do.call(abind, list('...' = mu.samples.new, 
-                                 along = 1))
-    object$y.rep.samples <- do.call(abind, list('...' = y.rep.samples.new, 
-                                    along = 1))
-    object$like.samples <- do.call(abind, list('...' = like.samples.new, 
-                                   along = 1))
-    object$ESS <- list()
-    # Calculate effective sample sizes
-    object$ESS$beta <- effectiveSize(object$beta.samples)
-    object$ESS$alpha <- effectiveSize(object$alpha.samples)
-    object$ESS$theta <- effectiveSize(object$theta.samples)
-    if (any(object$dist == 'NB')) {
-      object$ESS$kappa <- effectiveSize(object$kappa.samples)
-    }
-    if (object$muRE) {
-      object$ESS$sigma.sq.mu <- effectiveSize(object$sigma.sq.mu.samples)
-    }
-    if (object$pRE) {
-      object$ESS$sigma.sq.p <- effectiveSize(object$sigma.sq.p.samples)
-    }
-    object$n.burn <- ifelse(keep.orig, object$n.burn + n.burn, object$n.samples + n.burn)
-    object$n.samples <- object$n.samples + n.batch * object$update$batch.length
-    n.post.new <- length(seq(from = n.burn + 1, 
-                             to = n.batch * object$update$batch.length, 
-                             by = as.integer(n.thin)))
-    object$n.post <- ifelse(keep.orig, object$n.post + n.post.new, n.post.new)
-    object$run.time <- object$run.time + run.time.new 
-    object$update$tuning <- matrix(NA, nrow(out.tmp[[1]]$update$tuning), n.chains)
-    for (i in 1:n.chains) {
-      object$update$tuning[, i] <- out.tmp[[i]]$update$tuning
-    }
-    object$update$final.seed <- seeds.new
-    object$update$n.batch <- n.batch + object$update$n.batch
-  }
+  #   object$beta.samples <- mcmc(do.call(rbind, beta.samples.new))
+  #   object$alpha.samples <- mcmc(do.call(rbind, alpha.samples.new))
+  #   object$theta.samples <- mcmc(do.call(rbind, theta.samples.new))
+  #   if (any(object$dist == 'NB')) {
+  #     object$kappa.samples <- mcmc(do.call(rbind, kappa.samples.new))
+  #   }
+  #   if (object$muRE) {
+  #     object$sigma.sq.mu.samples <- mcmc(do.call(rbind, sigma.sq.mu.samples.new))
+  #     object$beta.star.samples <- mcmc(do.call(rbind, beta.star.samples.new))
+  #   }
+  #   if (object$pRE) {
+  #     object$sigma.sq.p.samples <- mcmc(do.call(rbind, sigma.sq.p.samples.new))
+  #     object$alpha.star.samples <- mcmc(do.call(rbind, alpha.star.samples.new))
+  #   }
+  #   object$w.samples <- do.call(abind, list('...' = w.samples.new, 
+  #                                along = 1))
+  #   object$mu.samples <- do.call(abind, list('...' = mu.samples.new, 
+  #                                along = 1))
+  #   object$y.rep.samples <- do.call(abind, list('...' = y.rep.samples.new, 
+  #                                   along = 1))
+  #   object$like.samples <- do.call(abind, list('...' = like.samples.new, 
+  #                                  along = 1))
+  #   object$ESS <- list()
+  #   # Calculate effective sample sizes
+  #   object$ESS$beta <- effectiveSize(object$beta.samples)
+  #   object$ESS$alpha <- effectiveSize(object$alpha.samples)
+  #   object$ESS$theta <- effectiveSize(object$theta.samples)
+  #   if (any(object$dist == 'NB')) {
+  #     object$ESS$kappa <- effectiveSize(object$kappa.samples)
+  #   }
+  #   if (object$muRE) {
+  #     object$ESS$sigma.sq.mu <- effectiveSize(object$sigma.sq.mu.samples)
+  #   }
+  #   if (object$pRE) {
+  #     object$ESS$sigma.sq.p <- effectiveSize(object$sigma.sq.p.samples)
+  #   }
+  #   object$n.burn <- ifelse(keep.orig, object$n.burn + n.burn, object$n.samples + n.burn)
+  #   object$n.samples <- object$n.samples + n.batch * object$update$batch.length
+  #   n.post.new <- length(seq(from = n.burn + 1, 
+  #                            to = n.batch * object$update$batch.length, 
+  #                            by = as.integer(n.thin)))
+  #   object$n.post <- ifelse(keep.orig, object$n.post + n.post.new, n.post.new)
+  #   object$run.time <- object$run.time + run.time.new 
+  #   object$update$tuning <- matrix(NA, nrow(out.tmp[[1]]$update$tuning), n.chains)
+  #   for (i in 1:n.chains) {
+  #     object$update$tuning[, i] <- out.tmp[[i]]$update$tuning
+  #   }
+  #   object$update$final.seed <- seeds.new
+  #   object$update$n.batch <- n.batch + object$update$n.batch
+  # }
   # sfJSDM ----------------------------------------------------------------
   if (is(object, 'sfJSDM')) {
     for (i in 1:n.chains) {
