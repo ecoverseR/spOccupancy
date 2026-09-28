@@ -2263,7 +2263,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
         stop("no new locations to predict at. See object$psi.samples for occurrence probabilities at sampled sites.")
       }
 
-      if (object$psiRE) {
+      if (object$psiRE & !ignore.RE) {
         beta.star.samples <- object$beta.star.samples
         re.level.names <- object$re.level.names
         # Get columns in design matrix with random effects
@@ -2622,7 +2622,7 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
     coords.indx <- match.indx[!is.na(match.indx)]
     coords.place.indx <- which(!is.na(match.indx))
 
-    if (object$psiRE) {
+    if (object$psiRE & !ignore.RE) {
       beta.star.samples <- object$beta.star.samples
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
