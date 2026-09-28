@@ -57,8 +57,8 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -133,8 +133,8 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(colnames(X.0) %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -626,8 +626,8 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0.new) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0.new))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
@@ -951,8 +951,8 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -1033,8 +1033,8 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(colnames(X.0) %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -1580,8 +1580,8 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0.new) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0.new))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       # Random effect columns in predicted values
@@ -2268,8 +2268,8 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
         re.level.names <- object$re.level.names
         # Get columns in design matrix with random effects
         x.re.names <- colnames(object$X.re)
-        indx <- which(colnames(X.0.new) %in% x.re.names)
-        if (length(indx) == 0) {
+        indx <- match(x.re.names, colnames(X.0.new))
+        if (sum(is.na(indx)) > 0) {
           stop("column names in X.0 must match variable names in data$occ.covs")
         }
         X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
@@ -2627,8 +2627,8 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -3176,8 +3176,8 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get elements in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -3387,8 +3387,8 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get elements in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -3483,8 +3483,8 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(dimnames(X.0)[[3]] %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$det.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -3672,8 +3672,8 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -3813,8 +3813,8 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(colnames(X.0) %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -4015,8 +4015,8 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
       re.level.names <- object$re.level.names
       # Get elements in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -4527,8 +4527,8 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -4793,7 +4793,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
       # Get columns in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
       x.names <- dimnames(object$X)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
       	     ncol = dim(X.re)[3])
@@ -5125,8 +5125,8 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -5232,8 +5232,8 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(dimnames(X.0)[[3]] %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$det.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
