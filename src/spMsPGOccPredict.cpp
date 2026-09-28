@@ -175,7 +175,7 @@ extern "C" {
           tmp_one2[0] = sigmaSq - tmp_one2[0];
 
 	        if (sites0Sampled[j] == 1) {
-            w0[s * qN + j * N + i] = wSamples[s * J + sitesLink[j]];
+            w0[s * qN + j * N + i] = wSamples[s * JN + sitesLink[j] * N + i];
 	        } else {
             w0[s * qN + j * N + i] = rnorm(tmp_one[0], sqrt(tmp_one2[0])); 
 	        }
