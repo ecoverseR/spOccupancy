@@ -360,7 +360,7 @@ residuals.PGOcc <- function(object, n.post.samples = 100, ...) {
   if (!(class(object) %in% c('PGOcc', 'spPGOcc', 'svcPGOcc'))) {
     stop('object must be of class PGOcc, spPGOcc, or svcPGOcc')
   }
-  n.post <- object$n.post
+  n.post <- object$n.post * object$n.chains
   # Generate sub-sample of MCMC samples if relevant
   indx <- sample(1:n.post, n.post.samples, replace = FALSE) 
   # Occupancy residuals
@@ -5334,7 +5334,10 @@ predict.stMsPGOcc <- function(object, X.0, coords.0,
   out <- predict.svcTMsPGOcc(object, X.0, coords.0, 
 			     t.cols, n.omp.threads, verbose, n.report,
 			     ignore.RE, type, grid.index.0)
-  out$w.0.samples <- out$w.0.samples[, , , 1]
+  if (!is.null(out$w.0.samples)) {
+    w.dims <- dim(out$w.0.samples)
+    out$w.0.samples <- array(out$w.0.samples[, , , 1, drop = FALSE], dim = w.dims[1:3])
+  }
   return(out)
 }
 
