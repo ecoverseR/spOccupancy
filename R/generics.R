@@ -1528,7 +1528,7 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     n.post <- object$n.post * object$n.chains
     X <- object$X
     y <- object$y
@@ -1749,12 +1749,12 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 predict.intPGOcc <- function(object, X.0, ignore.RE = FALSE, 
 			     type = 'occupancy', ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.PGOcc(object, X.0, ignore.RE, type)
   }
 
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     stop("detection prediction is not currently implemented.")
     out <- list()
   }
@@ -2027,12 +2027,12 @@ predict.spIntPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 			       verbose = TRUE, n.report = 100, 
 			       ignore.RE = FALSE, type = 'occupancy', ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.spPGOcc(object, X.0, coords.0, n.omp.threads, 
 			   verbose, n.report, ignore.RE, type)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     stop("detection prediction is not currently implemented.")
     out <- list()
   }
@@ -2223,7 +2223,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
   if (!include.w) {
     out <- predict.msPGOcc(object, X.0, ignore.RE, type)
   } else {
-    if (tolower(type == 'occupancy')) {
+    if (tolower(type) == 'occupancy') {
       p.occ <- ncol(object$X)
       p.design <- p.occ
       if (object$psiRE & !ignore.RE) {
@@ -2574,7 +2574,7 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     n.post <- object$n.post * object$n.chains
     X <- object$X
     y <- object$y
@@ -4462,7 +4462,7 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
       stop("coords.0 must be specified\n")
     }
@@ -4731,7 +4731,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
       stop("coords.0 must be specified\n")
     }
@@ -5342,11 +5342,11 @@ predict.stMsPGOcc <- function(object, X.0, coords.0,
 predict.tIntPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE, 
                               type = 'occupancy', ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.tPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
   # TODO: this should be pretty easy. Just have an argument for which data
   #       source to predict with, and then send the model to predict.tPGOcc
     stop("detection prediction is not currently implemented.")
@@ -5537,12 +5537,12 @@ predict.stIntPGOcc <- function(object, X.0, coords.0, t.cols,
                                n.omp.threads = 1, verbose = TRUE, n.report = 100, 
                                ignore.RE = FALSE,  type = 'occupancy', forecast = FALSE, ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.stPGOcc(object, X.0, coords.0, t.cols, n.omp.threads, 
                            verbose, n.report, ignore.RE, type, forecast)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     out <- predict.tIntPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   class(out) <- "predict.stIntPGOcc"
@@ -5568,14 +5568,14 @@ predict.svcTIntPGOcc <- function(object, X.0, coords.0, t.cols,
                                n.omp.threads = 1, verbose = TRUE, n.report = 100, 
                                ignore.RE = FALSE,  type = 'occupancy', forecast = FALSE, ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.svcTPGOcc(object = object, X.0 = X.0, coords.0 = coords.0, 
                              t.cols = t.cols, n.omp.threads = n.omp.threads, 
                              verbose = verbose, n.report = n.report, 
                              ignore.RE = ignore.RE, type = type, forecast = forecast)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     out <- predict.tIntPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   class(out) <- "predict.svcTIntPGOcc"
