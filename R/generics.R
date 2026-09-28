@@ -70,7 +70,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -146,7 +146,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -639,7 +639,7 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -964,7 +964,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -1046,7 +1046,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -1602,7 +1602,7 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
               } else {
                 X.re.ind[j, i] <- tmp 
               }
@@ -2288,7 +2288,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
               } else {
                 X.re.ind[j, i] <- tmp 
               }
@@ -2648,7 +2648,7 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
               } else {
                 X.re.ind[j, i] <- tmp 
               }
@@ -3200,7 +3200,7 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3411,7 +3411,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3507,7 +3507,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3692,7 +3692,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3833,7 +3833,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -4039,7 +4039,7 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -4548,7 +4548,7 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
               } else {
                 X.re.ind[j, i] <- tmp
               }
@@ -4820,7 +4820,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
               } else {
                 X.re.ind[j, i] <- tmp
               }
@@ -5149,7 +5149,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -5256,7 +5256,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
