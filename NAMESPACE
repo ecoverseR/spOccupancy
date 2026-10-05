@@ -39,6 +39,8 @@ export(tIntPGOcc)
 export(stIntPGOcc)
 export(svcTIntPGOcc)
 
+export(simFPOcc)
+
 S3method("predict", "PGOcc")
 S3method("print", "PGOcc")
 S3method("fitted", "PGOcc")

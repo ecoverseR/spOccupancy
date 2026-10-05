@@ -1,3 +1,7 @@
+# spOccupancy 0.8.1.9000
+
++ Created a new function `simFPOcc()` that simulates data for the false-positive occupancy model of Chambert et al. (2018). 
+
 # spOccupancy 0.8.1
 
 + Fixed a bug in `stMsPGOcc()` and `svcTMsPGOcc()` that prevented the models from running when there was only 1 within-season replicate. Thanks to Kevin Lafferty for bringing this to my attention. 
