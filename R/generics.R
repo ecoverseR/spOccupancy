@@ -57,8 +57,8 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -70,7 +70,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -133,8 +133,8 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(colnames(X.0) %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -146,7 +146,7 @@ predict.PGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -360,7 +360,7 @@ residuals.PGOcc <- function(object, n.post.samples = 100, ...) {
   if (!(class(object) %in% c('PGOcc', 'spPGOcc', 'svcPGOcc'))) {
     stop('object must be of class PGOcc, spPGOcc, or svcPGOcc')
   }
-  n.post <- object$n.post
+  n.post <- object$n.post * object$n.chains
   # Generate sub-sample of MCMC samples if relevant
   indx <- sample(1:n.post, n.post.samples, replace = FALSE) 
   # Occupancy residuals
@@ -626,8 +626,8 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0.new) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0.new))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
@@ -639,7 +639,7 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -951,8 +951,8 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -964,7 +964,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -1033,8 +1033,8 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(colnames(X.0) %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -1046,7 +1046,7 @@ predict.msPGOcc <- function(object, X.0, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -1528,7 +1528,7 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     n.post <- object$n.post * object$n.chains
     X <- object$X
     y <- object$y
@@ -1580,8 +1580,8 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0.new) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0.new))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       # Random effect columns in predicted values
@@ -1602,7 +1602,7 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
               } else {
                 X.re.ind[j, i] <- tmp 
               }
@@ -1681,13 +1681,6 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
           	 n.post, cov.model.indx, n.omp.threads, 
           	 verbose, n.report, sites.link, sites.0.sampled)
       
-      out$z.0.samples <- array(out$z.0.samples, dim = c(N, q, n.post))
-      out$z.0.samples <- aperm(out$z.0.samples, c(3, 1, 2))
-      out$w.0.samples <- array(out$w.0.samples, dim = c(N, q, n.post))
-      out$w.0.samples <- aperm(out$w.0.samples, c(3, 1, 2))
-      out$psi.0.samples <- array(out$psi.0.samples, dim = c(N, q, n.post))
-      out$psi.0.samples <- aperm(out$psi.0.samples, c(3, 1, 2))
-      
     } else { 
       # Get nearest neighbors 
       # nn2 is a function from RANN. 
@@ -1756,12 +1749,12 @@ predict.spMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 predict.intPGOcc <- function(object, X.0, ignore.RE = FALSE, 
 			     type = 'occupancy', ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.PGOcc(object, X.0, ignore.RE, type)
   }
 
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     stop("detection prediction is not currently implemented.")
     out <- list()
   }
@@ -2034,12 +2027,12 @@ predict.spIntPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
 			       verbose = TRUE, n.report = 100, 
 			       ignore.RE = FALSE, type = 'occupancy', ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.spPGOcc(object, X.0, coords.0, n.omp.threads, 
 			   verbose, n.report, ignore.RE, type)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     stop("detection prediction is not currently implemented.")
     out <- list()
   }
@@ -2230,7 +2223,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
   if (!include.w) {
     out <- predict.msPGOcc(object, X.0, ignore.RE, type)
   } else {
-    if (tolower(type == 'occupancy')) {
+    if (tolower(type) == 'occupancy') {
       p.occ <- ncol(object$X)
       p.design <- p.occ
       if (object$psiRE & !ignore.RE) {
@@ -2270,13 +2263,13 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
         stop("no new locations to predict at. See object$psi.samples for occurrence probabilities at sampled sites.")
       }
 
-      if (object$psiRE) {
+      if (object$psiRE & !ignore.RE) {
         beta.star.samples <- object$beta.star.samples
         re.level.names <- object$re.level.names
         # Get columns in design matrix with random effects
         x.re.names <- colnames(object$X.re)
-        indx <- which(colnames(X.0.new) %in% x.re.names)
-        if (length(indx) == 0) {
+        indx <- match(x.re.names, colnames(X.0.new))
+        if (sum(is.na(indx)) > 0) {
           stop("column names in X.0 must match variable names in data$occ.covs")
         }
         X.re <- as.matrix(X.0.new[, indx, drop = FALSE])
@@ -2288,7 +2281,7 @@ predict.lfMsPGOcc <- function(object, X.0, coords.0, ignore.RE = FALSE,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
               } else {
                 X.re.ind[j, i] <- tmp 
               }
@@ -2581,7 +2574,7 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     n.post <- object$n.post * object$n.chains
     X <- object$X
     y <- object$y
@@ -2629,13 +2622,13 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
     coords.indx <- match.indx[!is.na(match.indx)]
     coords.place.indx <- which(!is.na(match.indx))
 
-    if (object$psiRE) {
+    if (object$psiRE & !ignore.RE) {
       beta.star.samples <- object$beta.star.samples
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -2648,7 +2641,7 @@ predict.sfMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
               } else {
                 X.re.ind[j, i] <- tmp 
               }
@@ -3183,8 +3176,8 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get elements in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -3200,7 +3193,7 @@ predict.stPGOcc <- function(object, X.0, coords.0, t.cols, n.omp.threads = 1,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3394,8 +3387,8 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get elements in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -3411,7 +3404,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3490,8 +3483,8 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(dimnames(X.0)[[3]] %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$det.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -3507,7 +3500,7 @@ predict.tPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3679,8 +3672,8 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -3692,7 +3685,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -3820,8 +3813,8 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(colnames(X.0) %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$det.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -3833,7 +3826,7 @@ predict.svcPGOcc <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -4022,8 +4015,8 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
       re.level.names <- object$re.level.names
       # Get elements in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -4039,7 +4032,7 @@ predict.svcTPGOcc <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.th
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
             } else {
               X.re.ind[j, i] <- tmp
             }
@@ -4469,7 +4462,7 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
       stop("coords.0 must be specified\n")
     }
@@ -4534,8 +4527,8 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- colnames(object$X.re)
-      indx <- which(colnames(X.0) %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, colnames(X.0))
+      if (sum(is.na(indx)) > 0) {
         stop("column names in X.0 must match variable names in data$occ.covs")
       }
       X.re <- as.matrix(X.0[, indx, drop = FALSE])
@@ -4548,7 +4541,7 @@ predict.svcMsPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
               } else {
                 X.re.ind[j, i] <- tmp
               }
@@ -4738,7 +4731,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
   ptm <- proc.time()
 
   # Occurrence predictions ------------------------------------------------
-  if (tolower(type == 'occupancy')) {
+  if (tolower(type) == 'occupancy') {
     if (missing(coords.0)) {
       stop("coords.0 must be specified\n")
     }
@@ -4800,7 +4793,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
       # Get columns in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
       x.names <- dimnames(object$X)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
       X.re <- X.0[, , indx, drop = FALSE]
       X.re <- matrix(X.re, nrow = nrow(X.re) * ncol(X.re),
       	     ncol = dim(X.re)[3])
@@ -4820,7 +4813,7 @@ predict.svcTMsPGOcc <- function(object, X.0, coords.0,
             tmp <- which(re.level.names[[i]] == X.re[j, i])
             if (length(tmp) > 0) {
               if (i > 1) {
-                X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]])
+                X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
               } else {
                 X.re.ind[j, i] <- tmp
               }
@@ -5132,8 +5125,8 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       re.level.names <- object$re.level.names
       # Get columns in design matrix with random effects
       x.re.names <- dimnames(object$X.re)[[3]]
-      indx <- which(dimnames(X.0)[[3]] %in% x.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$occ.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -5149,7 +5142,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -5239,8 +5232,8 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
       p.re.level.names <- object$p.re.level.names
       # Get columns in design matrix with random effects
       x.p.re.names <- colnames(object$X.p.re)
-      indx <- which(dimnames(X.0)[[3]] %in% x.p.re.names)
-      if (length(indx) == 0) {
+      indx <- match(x.p.re.names, dimnames(X.0)[[3]])
+      if (sum(is.na(indx)) > 0) {
         stop("dimnames(X.0)[[3]] must match variable names in data$det.covs")
       }
       X.re <- X.0[, , indx, drop = FALSE]
@@ -5256,7 +5249,7 @@ predict.tMsPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE,
           tmp <- which(p.re.level.names[[i]] == X.re[j, i])
           if (length(tmp) > 0) {
             if (i > 1) {
-              X.re.ind[j, i] <- tmp + length(p.re.level.names[[i - 1]]) 
+              X.re.ind[j, i] <- tmp + sum(sapply(p.re.level.names[1:(i - 1)], length)) 
             } else {
               X.re.ind[j, i] <- tmp 
             }
@@ -5341,7 +5334,10 @@ predict.stMsPGOcc <- function(object, X.0, coords.0,
   out <- predict.svcTMsPGOcc(object, X.0, coords.0, 
 			     t.cols, n.omp.threads, verbose, n.report,
 			     ignore.RE, type, grid.index.0)
-  out$w.0.samples <- out$w.0.samples[, , , 1]
+  if (!is.null(out$w.0.samples)) {
+    w.dims <- dim(out$w.0.samples)
+    out$w.0.samples <- array(out$w.0.samples[, , , 1, drop = FALSE], dim = w.dims[1:3])
+  }
   return(out)
 }
 
@@ -5349,11 +5345,11 @@ predict.stMsPGOcc <- function(object, X.0, coords.0,
 predict.tIntPGOcc <- function(object, X.0, t.cols, ignore.RE = FALSE, 
                               type = 'occupancy', ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.tPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
   # TODO: this should be pretty easy. Just have an argument for which data
   #       source to predict with, and then send the model to predict.tPGOcc
     stop("detection prediction is not currently implemented.")
@@ -5544,12 +5540,12 @@ predict.stIntPGOcc <- function(object, X.0, coords.0, t.cols,
                                n.omp.threads = 1, verbose = TRUE, n.report = 100, 
                                ignore.RE = FALSE,  type = 'occupancy', forecast = FALSE, ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.stPGOcc(object, X.0, coords.0, t.cols, n.omp.threads, 
                            verbose, n.report, ignore.RE, type, forecast)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     out <- predict.tIntPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   class(out) <- "predict.stIntPGOcc"
@@ -5575,14 +5571,14 @@ predict.svcTIntPGOcc <- function(object, X.0, coords.0, t.cols,
                                n.omp.threads = 1, verbose = TRUE, n.report = 100, 
                                ignore.RE = FALSE,  type = 'occupancy', forecast = FALSE, ...) {
   # Occupancy predictions -------------------------------------------------
-  if (tolower(type == 'occupancy')) {	
+  if (tolower(type) == 'occupancy') {	
     out <- predict.svcTPGOcc(object = object, X.0 = X.0, coords.0 = coords.0, 
                              t.cols = t.cols, n.omp.threads = n.omp.threads, 
                              verbose = verbose, n.report = n.report, 
                              ignore.RE = ignore.RE, type = type, forecast = forecast)
   }
   # Detection predictions -------------------------------------------------
-  if (tolower(type == 'detection')) {
+  if (tolower(type) == 'detection') {
     out <- predict.tIntPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   class(out) <- "predict.svcTIntPGOcc"

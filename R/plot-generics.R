@@ -108,7 +108,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
     }
   }
   if (param == 'beta.star') {
-    if (!x$muRE) {
+    if (!x$psiRE) {
       stop("the model was not fit with any occurrence random effects (beta.star)")
     }
     for (i in 1:n.chains) {
