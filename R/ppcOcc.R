@@ -325,7 +325,7 @@ ppcOcc <- function(object, fit.stat, group, ...) {
         message(noquote(paste("Currently on time period ", t, " out of ", n.years.max, sep = '')))
         if (fit.stat %in% c('chi-squared', 'chi-square')) {
             for (j in 1:n.samples) {
-              E.grouped <- apply(det.prob[j, , t, ] * z.samples[j, , t], 1, sum, na.rm = TRUE)
+              E.grouped <- apply(matrix(det.prob[j, , t, ], nrow = J) * z.samples[j, , t], 1, sum, na.rm = TRUE)
               fit.big.y[j, , t] <- (y.grouped[, t] - E.grouped)^2 / (E.grouped + e)
               fit.y[j, t] <- sum(fit.big.y[j, , t])
               fit.big.y.rep[j, , t] <- (y.rep.grouped[j, , t] - E.grouped)^2 / (E.grouped + e)
@@ -333,7 +333,7 @@ ppcOcc <- function(object, fit.stat, group, ...) {
             }
         } else if (fit.stat == 'freeman-tukey') {
           for (j in 1:n.samples) {
-            E.grouped <- apply(det.prob[j, , t, ] * z.samples[j, , t], 1, sum, na.rm = TRUE)
+            E.grouped <- apply(matrix(det.prob[j, , t, ], nrow = J) * z.samples[j, , t], 1, sum, na.rm = TRUE)
             fit.big.y[j, , t] <- (sqrt(y.grouped[, t]) - sqrt(E.grouped))^2 
             fit.y[j, t] <- sum(fit.big.y[j, , t])
             fit.big.y.rep[j, , t] <- (sqrt(y.rep.grouped[j, , t]) - sqrt(E.grouped))^2 
@@ -350,7 +350,7 @@ ppcOcc <- function(object, fit.stat, group, ...) {
         message(noquote(paste("Currently on time period ", t, " out of ", n.years.max, sep = '')))
         if (fit.stat %in% c('chi-squared', 'chi-square')) {
           for (j in 1:n.samples) {
-            E.grouped <- apply(det.prob[j, , t, ] * z.samples[j, , t], 2, sum, na.rm = TRUE)
+            E.grouped <- apply(matrix(det.prob[j, , t, ], nrow = J) * z.samples[j, , t], 2, sum, na.rm = TRUE)
             fit.big.y[j, t, ] <- (y.grouped[t, ] - E.grouped)^2 / (E.grouped + e)
             fit.y[j, t] <- sum(fit.big.y[j, t, ])
             fit.big.y.rep[j, t, ] <- (y.rep.grouped[j, t, ] - E.grouped)^2 / (E.grouped + e)
@@ -358,7 +358,7 @@ ppcOcc <- function(object, fit.stat, group, ...) {
           }
         } else if (fit.stat == 'freeman-tukey') {
           for (j in 1:n.samples) {
-            E.grouped <- apply(det.prob[j, , t, ] * z.samples[j, , t], 2, sum, na.rm = TRUE)
+            E.grouped <- apply(matrix(det.prob[j, , t, ], nrow = J) * z.samples[j, , t], 2, sum, na.rm = TRUE)
             fit.big.y[j, t, ] <- (sqrt(y.grouped[t, ]) - sqrt(E.grouped))^2 
             fit.y[j, t] <- sum(fit.big.y[j, t, ])
             fit.big.y.rep[j, t, ] <- (sqrt(y.rep.grouped[j, t, ]) - sqrt(E.grouped))^2 
