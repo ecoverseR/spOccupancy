@@ -227,11 +227,11 @@ simIntOcc <- function(n.data, J.x, J.y, J.obs, n.rep, n.rep.max, beta, alpha,
       n.det.re[[q]] <- sum(n.det.re.long[[q]])
       alpha.star.indx[[q]] <- rep(1:p.det.re[[q]], n.det.re.long[[q]])
       alpha.star[[q]] <- rep(0, n.det.re[[q]])
-      X.p.re[[q]] <- array(NA, dim = c(J.obs[[q]], max(n.rep[[q]]), p.det.re[[q]]))
+      X.p.re[[q]] <- array(NA, dim = c(J.obs[[q]], n.rep.max[q], p.det.re[[q]]))
       for (i in 1:p.det.re[[q]]) {
         X.p.re[[q]][, , i] <- matrix(sample(1:p.RE[[q]]$levels[i], 
-					    J.obs[[q]] * max(n.rep[[q]]), replace = TRUE), 
-          	              J.obs[[q]], max(n.rep[[q]]))	      
+					    J.obs[[q]] * n.rep.max[q], replace = TRUE), 
+          	              J.obs[[q]], n.rep.max[q])	      
         alpha.star[[q]][which(alpha.star.indx[[q]] == i)] <- rnorm(p.RE[[q]]$levels[i], 
 								   0, 
 								   sqrt(p.RE[[q]]$sigma.sq.p[i]))

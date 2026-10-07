@@ -162,6 +162,12 @@ simTIntOcc <- function(n.data, J.x, J.y, J.obs, n.time, data.seasons, n.rep, n.r
       stop("error: sigma.sq.t must be specified when ar1 = TRUE")
     }
   }
+
+  # Protect against overwriting trend -
+  if (x.positive & (trend | sp.only)) {
+    stop("x.positive = TRUE is not supported with trend = TRUE or sp.only = TRUE")
+  }
+
   # data.seasons ------------------------
   if (missing(data.seasons)) {
     stop("error: data.seasons must be specified")

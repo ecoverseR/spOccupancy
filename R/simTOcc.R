@@ -54,9 +54,9 @@ simTOcc <- function(J.x, J.y, n.time, n.rep, n.rep.max, beta, alpha, sp.only = 0
   # beta ------------------------------
   if (missing(beta)) {
     stop("error: beta must be specified.")
-    if (length(beta) <= 1) {
-      stop("error: beta must have at least two elements (intercept and trend)")
-    }
+  }
+  if (length(beta) <= 1 & trend) {
+    stop("error: beta must have at least two elements (intercept and trend)")
   }
   # alpha -----------------------------
   if (missing(alpha)) {
@@ -148,10 +148,10 @@ simTOcc <- function(J.x, J.y, n.time, n.rep, n.rep.max, beta, alpha, sp.only = 0
     avail <- array(1, dim = c(J, max(n.time, na.rm = TRUE), n.rep.max))  
   } else {
     if (length(dim(avail)) != 3) {
-      stop(paste0("avail must be an array with dimensions of ", J, " x ", max(n.time), " x ", max(n.rep), "."))
+      stop(paste0("avail must be an array with dimensions of ", J, " x ", max(n.time), " x ", n.rep.max, "."))
     }
     if (dim(avail)[1] != J | dim(avail)[2] != max(n.time) | dim(avail)[3] != max(n.rep)) {
-      stop(paste0("avail must be an array with dimensions of ", J, " x ", max(n.time), " x ", max(n.rep), "."))
+      stop(paste0("avail must be an array with dimensions of ", J, " x ", max(n.time), " x ", n.rep.max, "."))
     }
   }
 
@@ -165,6 +165,11 @@ simTOcc <- function(J.x, J.y, n.time, n.rep, n.rep.max, beta, alpha, sp.only = 0
     }
   } else {
     grid <- 1:J
+  }
+
+  # Protect against overwriting trend -------------------------------------  
+  if (x.positive & (trend | sp.only)) {
+    stop("x.positive = TRUE is not supported with trend = TRUE or sp.only = TRUE")
   }
 
   # Subroutines -----------------------------------------------------------
@@ -183,7 +188,8 @@ simTOcc <- function(J.x, J.y, n.time, n.rep, n.rep.max, beta, alpha, sp.only = 0
   n.time.max <- max(n.time, na.rm = TRUE)
   time.indx <- list()
   for (j in 1:J) {
-    time.indx[[j]] <- sample(which(!is.na(n.rep[j, ])), n.time[j], replace = FALSE) 
+    idx <- which(!is.na(n.rep[j, ])); 
+    time.indx[[j]] <- idx[sample.int(length(idx), n.time[j])]
   }
   X <- array(NA, dim = c(J, n.time.max, p.occ))
   X[, , 1] <- 1

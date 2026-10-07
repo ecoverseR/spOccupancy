@@ -371,7 +371,7 @@ postHocLM <- function(formula, data, inits, priors, verbose = FALSE,
       }
     } else {
       out$rhat$beta <- rep(NA, p)
-      out$rhat$tau.sq.beta <- NA
+      out$rhat$tau.sq <- NA
       if (p.re > 0) {
         out$rhat$sigma.sq <- rep(NA, p.re)
       }

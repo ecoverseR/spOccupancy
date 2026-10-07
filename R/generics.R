@@ -3883,6 +3883,14 @@ summary.svcPGBinom <- function(object,
 predict.svcPGBinom <- function(object, X.0, coords.0, weights.0, n.omp.threads = 1,
 			       verbose = TRUE, n.report = 100,
 			       ignore.RE = FALSE, ...) {
+
+  # Check for unused arguments ------------------------------------------
+  formal.args <- names(formals(sys.function(sys.parent())))
+  elip.args <- names(list(...))
+  for(i in elip.args){
+    if(! i %in% formal.args)
+      warning("'",i, "' is not an argument")
+  }
   predict.svcPGOcc(object, X.0, coords.0, weights.0, n.omp.threads = n.omp.threads,
 		   verbose, n.report, ignore.RE, type = 'occupancy')
 
@@ -4187,6 +4195,14 @@ fitted.svcTPGBinom <- function(object, ...) {
 predict.svcTPGBinom <- function(object, X.0, coords.0, t.cols, weights.0, n.omp.threads = 1,
 			        verbose = TRUE, n.report = 100,
 			        ignore.RE = FALSE, ...) {
+
+  # Check for unused arguments ------------------------------------------
+  formal.args <- names(formals(sys.function(sys.parent())))
+  elip.args <- names(list(...))
+  for(i in elip.args){
+    if(! i %in% formal.args)
+      warning("'",i, "' is not an argument")
+  }
   predict.svcTPGOcc(object, X.0, coords.0, t.cols, weights.0, n.omp.threads = n.omp.threads, 
 		   verbose, n.report, ignore.RE, type = 'occupancy')
 

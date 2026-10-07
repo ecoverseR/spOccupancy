@@ -1,9 +1,10 @@
-# spOccupancy 0.8.1.9000
+# spOccupancy 0.8.2
 
 + Created a new function `simFPOcc()` that simulates data for the false-positive occupancy model of Chambert et al. (2018). 
-+ Fixed silent mis-predictions under certain combinations of random effects (see [#58](https://github.com/ecoverseR/spOccupancy/pull/58)). 
-+ Fixed a couple of bugs in the prediction function for `spMsPGOcc()` when using `NNGP = FALSE` (see [#58](https://github.com/ecoverseR/spOccupancy/pull/58)).  
-+ Fixed a few minor post-fit function crashes (see [#58](https://github.com/ecoverseR/spOccupancy/pull/58)). 
++ Fixed multiple bugs in prediction code that led to wrong predictions with specific combinations of non-spatial random effects ([#58](https://github.com/ecoverseR/spOccupancy/pull/58)). 
++ Fixed bug in prediction for NNGP = FALSE and an indexing problem with `spMsPGOcc` that could lead to scrambled output ([#58](https://github.com/ecoverseR/spOccupancy/pull/58)). 
++ Fixed a variety of small errors in prediction functions that led to function crashes ([#58](https://github.com/ecoverseR/spOccupancy/pull/58)). 
++ Fixed minor defects in multiple simulation functions ([#59](https://github.com/ecoverseR/spOccupancy/issues/59)). 
 
 # spOccupancy 0.8.1
 

@@ -1,6 +1,6 @@
 simTBinom <- function(J.x, J.y, n.time, weights, beta, sp.only = 0, 
-		      trend = TRUE, psi.RE = list(), sp = FALSE, 
-		      cov.model, sigma.sq, phi, nu, svc.cols = 1, 
+                      trend = TRUE, psi.RE = list(), sp = FALSE, 
+                      cov.model, sigma.sq, phi, nu, svc.cols = 1, 
                       ar1 = FALSE, rho, sigma.sq.t, x.positive = FALSE, ...) {
 
   # Check for unused arguments ------------------------------------------
@@ -50,9 +50,9 @@ simTBinom <- function(J.x, J.y, n.time, weights, beta, sp.only = 0,
   # beta ------------------------------
   if (missing(beta)) {
     stop("error: beta must be specified.")
-    if (length(beta) <= 1) {
-      stop("error: beta must have at least two elements (intercept and trend)")
-    }
+  }
+  if (length(beta) <= 1 & trend) {
+    stop("error: beta must have at least two elements (intercept and trend)")
   }
   # psi.RE ----------------------------
   names(psi.RE) <- tolower(names(psi.RE))
@@ -110,6 +110,9 @@ simTBinom <- function(J.x, J.y, n.time, weights, beta, sp.only = 0,
     if (missing(sigma.sq.t)) {
       stop("error: sigma.sq.t must be specified when ar1 = TRUE")
     }
+  }
+  if (x.positive & (trend | sp.only)) {
+    stop("x.positive = TRUE is not supported with trend = TRUE or sp.only = TRUE")
   }
   # Subroutines -----------------------------------------------------------
   logit <- function(theta, a = 0, b = 1){log((theta-a)/(b-theta))}
