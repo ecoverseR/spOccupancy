@@ -313,11 +313,7 @@ simTMsOcc <- function(J.x, J.y, n.time, n.rep, N, beta, alpha, sp.only = 0,
   } # i (spatially-varying coefficient)
 
   # Design matrix for spatially-varying coefficients
-  if (sp) {
-    X.w <- X[, , svc.cols, drop = FALSE]
-  } else{
-    X.w <- NA
-  }
+  X.w <- X[, , svc.cols, drop = FALSE]
 
   # Random effects --------------------------------------------------------
   if (length(psi.RE) > 0) {

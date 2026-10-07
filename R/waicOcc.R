@@ -46,6 +46,11 @@ waicOcc <- function(object, by.sp = FALSE, ...) {
       out <- c(elpd, pD, -2 * (elpd - pD))
     names(out) <- c("elpd", "pD", "WAIC")
     } else {
+      # Prevent WAIC from being reported when by.sp = TRUE for single-species models.
+      if (class(object) %in% c('tPGOcc', 'stPGOcc', 'svcTPGBinom', 
+                               'svcTPGOcc')) {
+        stop("by.sp = TRUE is not valid for single-species models")
+      }
       elpd <- apply(apply(object$like.samples, c(2, 3), function(a) log(mean(a))), 
                     1, sum, na.rm = TRUE) 
       pD <- apply(apply(object$like.samples, c(2, 3), function(a) var(log(a))), 
