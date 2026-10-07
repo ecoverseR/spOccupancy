@@ -9,7 +9,8 @@
 \usage{
 simFPOcc(J.x, J.y, n.rep, n.rep.max, beta, gamma, delta, psi.RE = list(), 
        mu.RE = list(), omega.RE = omega.RE, sp = FALSE, svc.cols = 1, cov.model, 
-       sigma.sq, phi, nu, x.positive = FALSE, grid, prop.val, kappa, family = "Poisson", ...)
+       sigma.sq, phi, nu, x.positive = FALSE, grid, prop.val, kappa, 
+       family = "Poisson", ...)
 }
 
 \arguments{

@@ -199,7 +199,10 @@ S3method("fitted", "svcTIntPGOcc")
 S3method("plot", "svcTIntPGOcc")
 S3method("summary", "svcTIntPGOcc")
 
-importFrom("stats", "dist", "rbinom", "rnorm", "coefficients", "glm", "is.empty.model", "model.matrix", "model.response", "terms", "runif", "quantile", "dbinom", "var", "rgamma", "sd", "pnorm")
+importFrom("stats", "dist", "rbinom", "rnorm", "coefficients", "glm", 
+           "is.empty.model", "model.matrix", "model.response", "terms", 
+           "runif", "quantile", "dbinom", "var", "rgamma", "sd", "pnorm", 
+           "rhyper", "rnbinom", "rpois")
 importFrom("coda", "mcmc", "gelman.diag", "mcmc.list", "effectiveSize")
 importFrom("abind", "abind")
 importFrom("RANN", "nn2")
