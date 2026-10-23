@@ -539,3 +539,8 @@ void expCov(int n, double rho, double sigmaSq, double *C){
     }
   }
 }
+
+double poisson_logpost(double N, double mu, double r) {
+  return N*(log(mu)+log(r))-exp(log(mu)+log(r)) - lgammafn(N + 1.0);
+}
+

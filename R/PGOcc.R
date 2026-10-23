@@ -16,9 +16,6 @@ PGOcc <- function(occ.formula, det.formula, data, inits, priors,
   # Functions ---------------------------------------------------------------
   logit <- function(theta, a = 0, b = 1) {log((theta-a)/(b-theta))}
   logit.inv <- function(z, a = 0, b = 1) {b-(b-a)/(1+exp(z))}
-  rigamma <- function(n, a, b){
-    1/rgamma(n = n, shape = a, rate = b)
-  }
 
   # Check for unused arguments ------------------------------------------
   formal.args <- names(formals(sys.function(sys.parent())))
@@ -77,7 +74,7 @@ PGOcc <- function(occ.formula, det.formula, data, inits, priors,
   if (!'det.covs' %in% names(data)) {
     if (det.formula == ~ 1) {
       if (verbose) {
-        message("detection covariates (det.covs) not specified in data.\nAssuming interept only detection model.\n")
+        message("detection covariates (det.covs) not specified in data.\nAssuming intercept only detection model.\n")
 }
       data$det.covs <- list(int = rep(1, dim(y)[1]))
     } else {

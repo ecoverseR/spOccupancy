@@ -50,4 +50,6 @@
   void clearUT(double *m, int n);
   void AR1(int n, double rho, double sigmaSq, double *C);
   void expCov(int n, double rho, double sigmaSq, double *C);
+  double poisson_logpost(double N, double mu, double r);
+
 

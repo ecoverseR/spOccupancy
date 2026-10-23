@@ -15,3 +15,8 @@
 ^\.github$
 ^tests$
 ^README\.html$
+^background_docs$
+^local_testing$
+^CLAUDE\.md$
+^CLAUDE\.local\.md$
+^\.claude$

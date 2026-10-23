@@ -39,3 +39,7 @@ vignettes/modelConsiderations_cache
 vignettes/modelConsiderations_files
 vignettes/modelConsiderations.Rmd
 spOccupancy.Rproj
+background_docs
+local_testing
+CLAUDE.local.md
+.claude
