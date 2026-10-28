@@ -13,33 +13,38 @@ ppcOcc <- function(object, fit.stat, group, ...) {
   # Some initial checks -------------------------------------------------
   # Object ----------------------------
   if (missing(object)) {
-    stop("error: object must be specified")
+    stop("object must be specified")
   }
   if (class(object) %in% c('lfJSDM', 'sfJSDM', 'svcPGBinom', 'svcTPGBinom')) {
-    stop("error: ppcOcc is not implemented for lfJSDM, sfJSDM, svcPGBinom, svcTPGBinom")
+    stop("ppcOcc is not implemented for lfJSDM, sfJSDM, svcPGBinom, svcTPGBinom")
   }
   if (!(class(object) %in% c('PGOcc', 'spPGOcc', 'msPGOcc', 
                              'spMsPGOcc', 'intPGOcc', 'spIntPGOcc', 
                              'lfMsPGOcc', 'sfMsPGOcc', 'tPGOcc', 'stPGOcc', 
                              'svcPGOcc', 'svcTPGOcc', 'tMsPGOcc', 'svcMsPGOcc', 
                              'svcTMsPGOcc', 'stMsPGOcc', 'tIntPGOcc', 
-                             'stIntPGOcc', 'svcTIntPGOcc'))) {
-    stop("error: object must be one of the following classes: PGOcc, spPGOcc, msPGOcc, spMsPGOcc, intPGOcc, spIntPGOcc, lfMsPGOcc, sfMsPGOcc, tPGOcc, stPGOcc, svcPGOcc, svcTPGOcc, tMsPGOcc, svcMsPGOcc, svcTMsPGOcc, stMsPGOcc, tIntPGOcc, stIntPGOcc, svcTIntPGOcc\n")
+                             'stIntPGOcc', 'svcTIntPGOcc', 'fpPGOcc'))) {
+    stop("object must be one of the following classes: PGOcc, spPGOcc, msPGOcc, spMsPGOcc, intPGOcc, spIntPGOcc, lfMsPGOcc, sfMsPGOcc, tPGOcc, stPGOcc, svcPGOcc, svcTPGOcc, tMsPGOcc, svcMsPGOcc, svcTMsPGOcc, stMsPGOcc, tIntPGOcc, stIntPGOcc, svcTIntPGOcc, fpPGOcc\n")
   }
   # Fit statistic ---------------------
   if (missing(fit.stat)) {
-    stop("error: fit.stat must be specified")
+    stop("fit.stat must be specified")
   }
   if (!tolower(fit.stat) %in% c('chi-squared', 'freeman-tukey', 'chi-square')) {
-    stop("error: fit.stat must be either 'chi-squared' or 'freeman-tukey'")
+    stop("fit.stat must be either 'chi-squared' or 'freeman-tukey'")
   }
   fit.stat <- tolower(fit.stat)
   # Group -----------------------------
   if (missing(group)) {
-    stop("error: group must be specified")
+    stop("group must be specified")
   }
-  if (!(group %in% c(1, 2))) {
-    stop("error: group must be 1 (sites) or 2 (replicates)")
+  if (class(object) %in% c('fpPGOcc')) {
+    # Count data can be checked without binning, so allow cell-level checks.
+    if (!(group %in% c(0, 1, 2))) {
+      stop("group must be 0 (site/replicate cells), 1 (sites), or 2 (replicates)")
+    }
+  } else if (!(group %in% c(1, 2))) {
+    stop("group must be 1 (sites) or 2 (replicates)")
   }
   # Functions -------------------------------------------------------------
   logit <- function(theta, a = 0, b = 1) {log((theta-a)/(b-theta))}
@@ -47,7 +52,6 @@ ppcOcc <- function(object, fit.stat, group, ...) {
 
   out <- list()
   # Single-species models -------------------------------------------------
-  #if (is(object, c('PGOcc', 'spPGOcc'))) {
   if (class(object) %in% c('PGOcc', 'spPGOcc', 'svcPGOcc')) {
     y <- object$y
     J <- nrow(y)
@@ -125,7 +129,6 @@ ppcOcc <- function(object, fit.stat, group, ...) {
     out$n.chains <- object$n.chains
   } 
   # Multispecies models ---------------------------------------------------
-  # if (is(object, c('msPGOcc', 'spMsPGOcc', 'lfMsPGOcc', 'sfMsPGOcc'))) {
   if (class(object) %in% c('msPGOcc', 'spMsPGOcc', 'lfMsPGOcc', 'sfMsPGOcc', 'svcMsPGOcc')) {
     y <- object$y
     J <- dim(y)[2]
@@ -302,7 +305,6 @@ ppcOcc <- function(object, fit.stat, group, ...) {
     out$n.chains <- object$n.chains
   }
   # Multi-season models ---------------------------------------------------
-  # if (is(object, c('msPGOcc', 'spMsPGOcc', 'lfMsPGOcc', 'sfMsPGOcc'))) {
   if (class(object) %in% c('tPGOcc', 'stPGOcc', 'svcTPGOcc')) {
     y <- object$y
     J <- dim(y)[1]
@@ -585,8 +587,94 @@ ppcOcc <- function(object, fit.stat, group, ...) {
     out$n.chains <- object$n.chains
   }
 
+  # False positive models -------------------------------------------------
+  if (class(object) %in% c('fpPGOcc')) {
+    out <- ppcFPOcc(object, fit.stat, group)
+    out$group <- group
+    out$fit.stat <- fit.stat
+    out$class <- class(object)
+    out$call <- cl
+    out$n.samples <- object$n.samples
+    out$n.burn <- object$n.burn
+    out$n.thin <- object$n.thin
+    out$n.post <- object$n.post
+    out$n.chains <- object$n.chains
+  }
+
   class(out) <- 'ppcOcc'
 
   return(out)
 
+}
+
+# Internal: posterior samples of a fit statistic for one data stream, computed
+# on long-format data (one row per observed site/visit cell). obs is the
+# observed data (length n.obs), rep and E are n.obs x n.draws matrices of
+# replicate data and expected values, and grp assigns each cell to a group.
+# Returns the per-draw fit statistic totals for the observed and replicate
+# data, and the n.groups x n.draws matrices of per-group contributions, with
+# groups in sorted order of grp.
+ppcFitStat <- function(obs, rep, E, grp, fit.stat, e = 0.0001) {
+  obs.grouped <- c(rowsum(obs, grp))
+  rep.grouped <- rowsum(rep, grp)
+  E.grouped <- rowsum(E, grp)
+  if (fit.stat %in% c('chi-squared', 'chi-square')) {
+    fit.big.y <- (obs.grouped - E.grouped)^2 / (E.grouped + e)
+    fit.big.y.rep <- (rep.grouped - E.grouped)^2 / (E.grouped + e)
+  } else if (fit.stat == 'freeman-tukey') {
+    fit.big.y <- (sqrt(obs.grouped) - sqrt(E.grouped))^2
+    fit.big.y.rep <- (sqrt(rep.grouped) - sqrt(E.grouped))^2
+  }
+  list(fit.y = colSums(fit.big.y), fit.y.rep = colSums(fit.big.y.rep),
+       fit.big.y = fit.big.y, fit.big.y.rep = fit.big.y.rep)
+}
+
+# Internal: posterior predictive checks for fpPGOcc. Separate checks are done
+# for the detection counts y ~ Poisson(z * mu + omega) and the validation data
+# d ~ Binomial(n.val, z * mu / (z * mu + omega)). Both condition on the
+# posterior draws of z, and the d check conditions on the observed n.val.
+ppcFPOcc <- function(object, fit.stat, group) {
+  J <- nrow(object$y)
+  K.max <- ncol(object$y)
+  n.samples <- object$n.post * object$n.chains
+  rep.long <- fpPGOccRep(object, 1:n.samples)
+  names.long <- rep.long$names.long
+  # Site and replicate of each observed cell (cells are ordered site, then visit)
+  site.long <- (names.long - 1) %% J + 1
+  rep.indx.long <- (names.long - 1) %/% J + 1
+  grp <- switch(as.character(group), 
+                '0' = seq_along(names.long),
+                '1' = site.long, 
+                '2' = rep.indx.long)
+  y.long <- c(object$y)[names.long]
+  d.long <- c(object$d)[names.long]
+  # Expected values for each draw
+  E.y <- rep.long$lambda
+  E.d <- rep.long$n.val * rep.long$p.tp
+  fit.y <- ppcFitStat(y.long, rep.long$y.rep, E.y, grp, fit.stat)
+  fit.d <- ppcFitStat(d.long, rep.long$d.rep, E.d, grp, fit.stat)
+
+  # Posterior quantiles of the fit statistic for each group. For group = 0,
+  # these are placed in a 5 x J x K.max array with NA for missing cells.
+  probs <- c(0.025, 0.25, 0.5, 0.75, 0.975)
+  group.quants <- function(a) {
+    quants <- apply(a, 1, quantile, probs)
+    if (group == 0) {
+      tmp <- matrix(NA, length(probs), J * K.max)
+      tmp[, names.long] <- quants
+      quants <- array(tmp, dim = c(length(probs), J, K.max), 
+                      dimnames = list(rownames(quants), NULL, NULL))
+    }
+    quants
+  }
+  out <- list()
+  out$fit.y <- fit.y$fit.y
+  out$fit.y.rep <- fit.y$fit.y.rep
+  out$fit.y.group.quants <- group.quants(fit.y$fit.big.y)
+  out$fit.y.rep.group.quants <- group.quants(fit.y$fit.big.y.rep)
+  out$fit.d <- fit.d$fit.y
+  out$fit.d.rep <- fit.d$fit.y.rep
+  out$fit.d.group.quants <- group.quants(fit.d$fit.big.y)
+  out$fit.d.rep.group.quants <- group.quants(fit.d$fit.big.y.rep)
+  out
 }

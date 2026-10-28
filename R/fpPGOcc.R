@@ -90,7 +90,7 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
       if (verbose) {
         message("true positive detection covariates (tp.det.covs) not specified in data.\nAssuming intercept only true positive detection model.\n")
 }
-      data$tp.det.covs <- list(int = rep(1, dim(y)[1]))
+      data$tp.det.covs <- list(int = matrix(1, dim(y)[1], dim(y)[2]))
     } else {
       stop("tp.det.covs must be specified in data for a true positive detection model with covariates")
     }
@@ -103,7 +103,7 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
       if (verbose) {
         message("false positive detection covariates (fp.det.covs) not specified in data.\nAssuming intercept only false positive detection model.\n")
 }
-      data$fp.det.covs <- list(int = rep(1, dim(y)[1]))
+      data$fp.det.covs <- list(int = matrix(1, dim(y)[1], dim(y)[2]))
     } else {
       stop("fp.det.covs must be specified in data for a true positive detection model with covariates")
     }
@@ -135,15 +135,23 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
   data$fp.det.covs <- data$fp.det.covs[names(data$fp.det.covs) %in% all.vars(fp.det.formula)]
   # Null model support
   if (length(data$tp.det.covs) == 0) {
-    data$tp.det.covs <- list(int = rep(1, dim(y)[1]))
+    data$tp.det.covs <- list(int = matrix(1, dim(y)[1], dim(y)[2]))
   }
   if (length(data$fp.det.covs) == 0) {
-    data$fp.det.covs <- list(int = rep(1, dim(y)[1]))
+    data$fp.det.covs <- list(int = matrix(1, dim(y)[1], dim(y)[2]))
   }
   # Make both covariates a data frame. Unlist is necessary for when factors
   # are supplied. 
-  data$tp.det.covs <- data.frame(lapply(data$tp.det.covs, function(a) unlist(c(a))))
-  data$fp.det.covs <- data.frame(lapply(data$fp.det.covs, function(a) unlist(c(a))))
+  # The likelihood is defined per survey, so expand any site-level covariates
+  # (length J vectors) to J x K.max matrices before flattening like y.
+  expand.site <- function(a) {
+    if (is.null(dim(a)) && length(a) == nrow(y)) {
+      a <- matrix(a, nrow(y), ncol(y))
+    }
+    unlist(c(a))
+  }
+  data$tp.det.covs <- data.frame(lapply(data$tp.det.covs, expand.site))
+  data$fp.det.covs <- data.frame(lapply(data$fp.det.covs, expand.site))
   # Check if all detection covariates are at site level, and simplify the data
   # if necessary. This is highly unlikely in practice
   y.big <- y
@@ -238,36 +246,38 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
       data$fp.det.covs[y.missing, i] <- NA
     }
   }
-  # fp.det.covs ------------------------
-  for (i in 1:ncol(data$fp.det.covs)) {
-    if (sum(is.na(data$fp.det.covs[, i])) > sum(is.na(y.big))) {
-      stop("some elements in fp.det.covs have missing values where there is an observed data value in y. Please either replace the NA values in fp.det.covs with non-missing values (e.g., mean imputation) or set the corresponding values in y to NA where the covariate is missing.") 
-    }
-  }
-  # Misalignment between y and det.covs
-  y.missing <- which(is.na(data$y))
-  fp.det.covs.missing <- lapply(data$fp.det.covs, function(a) which(is.na(a)))
-  for (i in 1:length(fp.det.covs.missing)) {
-    tmp.indx <- !(y.missing %in% fp.det.covs.missing[[i]])
-    if (sum(tmp.indx) > 0) {
-      if (i == 1 & verbose) {
-        message("There are missing values in data$y with corresponding non-missing values in data$fp.det.covs.\nRemoving these site/replicate combinations for fitting the model.")
-      }
-      data$fp.det.covs[y.missing, i] <- NA
-    }
-  }
-  # TODO: 
   # Check missingness patterns in the validated data
   # Cells that are missing should be identical between d, n.val, and y. 
   n.val.missing <- which(is.na(data$n.val)) 
   d.missing <- which(is.na(data$d))
-  if (!all.equal(n.val.missing, y.missing)) {
+  if (!isTRUE(all.equal(n.val.missing, y.missing))) {
     stop("mismatch between missing values in n.val and y. These must have the same number and location of missing values")
   }
-  if (!all.equal(n.val.missing, d.missing)) {
+  if (!isTRUE(all.equal(n.val.missing, d.missing))) {
     stop("mismatch between missing values in n.val and d. These must have the same number and location of missing values")
   }
-  
+  # Check y, n.val, and d are non-negative integer counts with d <= n.val <= y.
+  # Otherwise the Poisson/binomial likelihoods are -Inf and the sampler stalls.
+  is.count <- function(a) {
+    a <- a[!is.na(a)]
+    all(a >= 0 & a == round(a))
+  }
+  if (!is.count(y.big)) {
+    stop("y must contain non-negative integer counts")
+  }
+  if (!is.count(n.val.big)) {
+    stop("n.val must contain non-negative integer counts")
+  }
+  if (!is.count(d.big)) {
+    stop("d must contain non-negative integer counts")
+  }
+  if (sum(n.val.big > y.big, na.rm = TRUE) > 0) {
+    stop("n.val cannot be larger than y. The number of validated signals must be less than or equal to the total number of signals")
+  }
+  if (sum(d.big > n.val.big, na.rm = TRUE) > 0) {
+    stop("d cannot be larger than n.val. The number of validated true positives must be less than or equal to the number of validated signals")
+  }
+
   # Formula -------------------------------------------------------------
   # Occupancy -----------------------
   if (is(occ.formula, 'formula')) {
@@ -365,7 +375,13 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
     X.mu <- X.mu[!is.na(y), , drop = FALSE]  
   }
   if (nrow(X.omega) == length(y)) {
-    X.omega <- X.omega[!is.na(y), , drop = FALSE]  
+    X.omega <- X.omega[!is.na(y), , drop = FALSE]
+  }
+  if (nrow(X.mu.re) == length(y) & p.tp.det.re > 0) {
+    X.mu.re <- X.mu.re[!is.na(y), , drop = FALSE]
+  }
+  if (nrow(X.omega.re) == length(y) & p.fp.det.re > 0) {
+    X.omega.re <- X.omega.re[!is.na(y), , drop = FALSE]
   }
   y <- y[!is.na(y)]
   n.val <- n.val[!is.na(n.val)]
@@ -469,11 +485,51 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
     Sigma.gamma <- sigma.gamma * diag(p.tp.det)
   } else {
     if (verbose) {
-      message("No prior specified for gamma.normal.\nSetting prior mean to 0 and prior variance to 2.72\n")
+      message("No prior specified for gamma.normal.\nSetting prior mean to 0 and prior variance to 10\n")
     }
     mu.gamma <- rep(0, p.tp.det)
-    sigma.gamma <- rep(2.72, p.tp.det)
-    Sigma.gamma <- diag(p.tp.det) * 2.72
+    sigma.gamma <- rep(10, p.tp.det)
+    Sigma.gamma <- diag(p.tp.det) * 10 
+  }
+  # delta -----------------------
+  if ("delta.normal" %in% names(priors)) {
+    if (!is.list(priors$delta.normal) | length(priors$delta.normal) != 2) {
+      stop("delta.normal must be a list of length 2")
+    }
+    mu.delta <- priors$delta.normal[[1]]
+    sigma.delta <- priors$delta.normal[[2]]
+    if (length(mu.delta) != p.fp.det & length(mu.delta) != 1) {
+      if (p.fp.det == 1) {
+        stop(paste("delta.normal[[1]] must be a vector of length ",
+                   p.fp.det, " with elements corresponding to deltas' mean", sep = ""))
+      } else {
+        stop(paste("delta.normal[[1]] must be a vector of length ",
+                   p.fp.det, " or 1 with elements corresponding to deltas' mean", sep = ""))
+      }
+    }
+    if (length(sigma.delta) != p.fp.det & length(sigma.delta) != 1) {
+      if (p.fp.det == 1) {
+        stop(paste("delta.normal[[2]] must be a vector of length ",
+                   p.fp.det, " with elements corresponding to deltas' variance", sep = ""))
+      } else {
+        stop(paste("delta.normal[[2]] must be a vector of length ",
+                   p.fp.det, " or 1 with elements corresponding to deltas' variance", sep = ""))
+      }
+    }
+    if (length(sigma.delta) != p.fp.det) {
+      sigma.delta <- rep(sigma.delta, p.fp.det)
+    }
+    if (length(mu.delta) != p.fp.det) {
+      mu.delta <- rep(mu.delta, p.fp.det)
+    }
+    Sigma.delta <- sigma.delta * diag(p.fp.det)
+  } else {
+    if (verbose) {
+      message("No prior specified for delta.normal.\nSetting prior mean to 0 and prior variance to 10\n")
+    }
+    mu.delta <- rep(0, p.fp.det)
+    sigma.delta <- rep(10, p.fp.det)
+    Sigma.delta <- diag(p.fp.det) * 10 
   }
   # sigma.sq.psi --------------------
   if (p.occ.re > 0) {
@@ -517,46 +573,6 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
   } else {
     sigma.sq.psi.a <- 0
     sigma.sq.psi.b <- 0
-  }
-  # delta -----------------------
-  if ("delta.normal" %in% names(priors)) {
-    if (!is.list(priors$delta.normal) | length(priors$delta.normal) != 2) {
-      stop("delta.normal must be a list of length 2")
-    }
-    mu.delta <- priors$delta.normal[[1]]
-    sigma.delta <- priors$delta.normal[[2]]
-    if (length(mu.delta) != p.fp.det & length(mu.delta) != 1) {
-      if (p.fp.det == 1) {
-        stop(paste("delta.normal[[1]] must be a vector of length ",
-                   p.fp.det, " with elements corresponding to deltas' mean", sep = ""))
-      } else {
-        stop(paste("delta.normal[[1]] must be a vector of length ",
-                   p.fp.det, " or 1 with elements corresponding to deltas' mean", sep = ""))
-      }
-    }
-    if (length(sigma.delta) != p.fp.det & length(sigma.delta) != 1) {
-      if (p.fp.det == 1) {
-        stop(paste("delta.normal[[2]] must be a vector of length ",
-                   p.fp.det, " with elements corresponding to deltas' variance", sep = ""))
-      } else {
-        stop(paste("delta.normal[[2]] must be a vector of length ",
-                   p.fp.det, " or 1 with elements corresponding to deltas' variance", sep = ""))
-      }
-    }
-    if (length(sigma.delta) != p.fp.det) {
-      sigma.delta <- rep(sigma.delta, p.fp.det)
-    }
-    if (length(mu.delta) != p.fp.det) {
-      mu.delta <- rep(mu.delta, p.fp.det)
-    }
-    Sigma.delta <- sigma.delta * diag(p.fp.det)
-  } else {
-    if (verbose) {
-      message("No prior specified for delta.normal.\nSetting prior mean to 0 and prior variance to 2.72\n")
-    }
-    mu.delta <- rep(0, p.fp.det)
-    sigma.delta <- rep(2.72, p.fp.det)
-    Sigma.delta <- diag(p.fp.det) * 2.72
   }
   # sigma.sq.mu --------------------
   if (p.tp.det.re > 0) {
@@ -661,10 +677,18 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
       stop(paste("initial values for z must be a vector of length ",
                  J, sep = ""))
     }
+    if (!all(z.inits %in% c(0, 1))) {
+      stop("initial values for z must be 0 or 1")
+    }
+    # A validated true positive (d > 0) means the site is occupied.
+    z.test <- apply(d.big, 1, function(a) sum(a, na.rm = TRUE) > 0)
+    if (sum(z.inits < z.test) > 0) {
+      stop("initial values for latent occurrence (z) are invalid. Please re-specify inits$z so initial values are 1 at sites with at least one validated true positive (d > 0).")
+    }
   } else {
     # Default is to set initial values based on wherever the species was observed, even though 
     # some of those observations may be false positives. 
-    z.inits <- apply(y.big, 1, max, na.rm = TRUE)
+    z.inits <- as.numeric(apply(y.big, 1, max, na.rm = TRUE) > 0)
     if (verbose) {
       message("z is not specified in initial values.\nSetting initial values based on observed data\n")
     }
@@ -823,27 +847,6 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
     delta.star.indx <- 0
     delta.star.inits <- 0
   }
-  # D ---------------------------------
-  # NOTE: you look for d since you call tolower() on the user-supplied inits list. 
-  if ("d" %in% names(inits)) {
-    D.inits <- inits$d
-    if (!is.matrix(D.inits)) {
-      stop(paste("initial values for D must be a matrix with", J, "rows and", 
-                 K.max, "columns"))
-    }
-    if (nrow(D.inits) != J | ncol(D.inits) != K.max) {
-      stop(paste("initial values for D must be a matrix with", J, "rows and", 
-                 K.max, "columns"))
-    }
-    D.inits <- D.inits[!is.na(d.big)]
-  } else {
-    # Default is set to the number of true positives in the validation data set
-    D.inits <- d.big
-    if (verbose) {
-      message("D is not specified in initial values.\nSetting initial values based on observed validation data\n")
-    }
-    D.inits <- D.inits[!is.na(d.big)]
-  }
   
   # Should initial values be fixed --
   if ("fix" %in% names(inits)) {
@@ -930,14 +933,18 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
   storage.mode(X.mu) <- "double"
   storage.mode(X.omega) <- "double"
   storage.mode(X) <- "double"
-  consts <- c(J, n.obs, p.occ, p.occ.re, n.occ.re, p.tp.det, p.tp.det.re, 
-              n.tp.det.re, p.fp.det, p.fp.det.re, n.fp.det.re)
+  # Whether the first column of X.mu/X.omega is an intercept. Required for the
+  # joint intercept/random effect shift in the sampler.
+  tp.det.int <- as.integer(x.mu.names[1] == "(Intercept)")
+  fp.det.int <- as.integer(x.omega.names[1] == "(Intercept)")
+  consts <- c(J, n.obs, p.occ, p.occ.re, n.occ.re, p.tp.det, p.tp.det.re,
+              n.tp.det.re, p.fp.det, p.fp.det.re, n.fp.det.re, tp.det.int,
+              fp.det.int)
   storage.mode(consts) <- "integer"
   storage.mode(K) <- "double"
   storage.mode(beta.inits) <- "double"
   storage.mode(gamma.inits) <- "double"
   storage.mode(delta.inits) <- "double"
-  storage.mode(D.inits) <- "double"
   storage.mode(z.long.indx) <- "integer"
   storage.mode(mu.beta) <- "double"
   storage.mode(Sigma.beta) <- "double"
@@ -1015,11 +1022,11 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
     storage.mode(chain.info) <- "integer"
     # Run the model in C
     out.tmp[[i]] <- .Call("fpPGOcc", y, X, X.mu, X.omega, X.re, X.mu.re, X.omega.re, 
-                          d, n.val, consts, K, n.occ.re.long, n.tp.det.re.long, 
+                          d, n.val, consts, n.occ.re.long, n.tp.det.re.long, 
                           n.fp.det.re.long, beta.inits, gamma.inits, delta.inits,
                           sigma.sq.psi.inits, sigma.sq.mu.inits, sigma.sq.omega.inits, 
                           beta.star.inits, gamma.star.inits, delta.star.inits, z.inits, 
-                          D.inits, z.long.indx, beta.star.indx, beta.level.indx, 
+                          z.long.indx, beta.star.indx, beta.level.indx, 
                           gamma.star.indx, gamma.level.indx, delta.star.indx, 
                           delta.level.indx, mu.beta, mu.gamma, mu.delta, 
                           Sigma.beta, Sigma.gamma, Sigma.delta, sigma.sq.psi.a, 
@@ -1082,9 +1089,6 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
                                     lapply(out.tmp, function(a) t(a$delta.samples))))
   colnames(out$delta.samples) <- x.omega.names
   out$z.samples <- mcmc(do.call(rbind, lapply(out.tmp, function(a) t(a$z.samples))))
-  # TODO: this needs to be fixed eventually to give the observation values in the right 
-  #       array shape. 
-  out$D.samples <- mcmc(do.call(rbind, lapply(out.tmp, function(a) t(a$D.samples))))
   out$psi.samples <- mcmc(do.call(rbind, lapply(out.tmp, function(a) t(a$psi.samples))))
   out$like.samples <- mcmc(do.call(rbind, lapply(out.tmp, function(a) t(a$like.samples))))
   if (p.occ.re > 0) {
@@ -1124,6 +1128,7 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
   out$ESS <- list()
   out$ESS$beta <- effectiveSize(out$beta.samples)
   out$ESS$gamma <- effectiveSize(out$gamma.samples)
+  out$ESS$delta <- effectiveSize(out$delta.samples)
   if (p.tp.det.re > 0) {
     out$ESS$sigma.sq.mu <- effectiveSize(out$sigma.sq.mu.samples)
   }
@@ -1140,6 +1145,8 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
   out$X.mu.re <- X.mu.re
   out$X.omega.re <- X.omega.re
   out$y <- y.big
+  out$n.val <- n.val.big
+  out$d <- d.big
   out$n.samples <- batch.length * n.batch
   out$call <- cl
   out$n.post <- n.post.samples
@@ -1161,6 +1168,8 @@ fpPGOcc <- function(occ.formula, tp.det.formula, fp.det.formula,
   } else {
     out$psiRE <- FALSE
   }
-  
-  return(out)
+
+  class(out) <- "fpPGOcc"
+  out$run.time <- proc.time() - ptm
+  out
 }

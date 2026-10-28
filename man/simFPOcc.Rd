@@ -8,15 +8,15 @@
 
 \usage{
 simFPOcc(J.x, J.y, n.rep, n.rep.max, beta, gamma, delta, psi.RE = list(), 
-       mu.RE = list(), omega.RE = omega.RE, sp = FALSE, svc.cols = 1, cov.model, 
+       mu.RE = list(), omega.RE = list(), sp = FALSE, svc.cols = 1, cov.model, 
        sigma.sq, phi, nu, x.positive = FALSE, grid, prop.val, kappa, 
        family = "Poisson", ...)
 }
 
 \arguments{
-\item{J.x}{a single numeric value indicating the number of sites to simulate detection-nondetection data along the horizontal axis. Total number of sites with simulated data is \eqn{J.x \times J.y}{J.x x J.y}. }
+\item{J.x}{a single numeric value indicating the number of sites to simulate data along the horizontal axis. Total number of sites with simulated data is \eqn{J.x \times J.y}{J.x x J.y}. }
 
-\item{J.y}{a single numeric value indicating the number of sites to simulate detection-nondetection data along the vertical axis. Total number of sites with simulated data is \eqn{J.x \times J.y}{J.x x J.y}. }
+\item{J.y}{a single numeric value indicating the number of sites to simulate data along the vertical axis. Total number of sites with simulated data is \eqn{J.x \times J.y}{J.x x J.y}. }
 
 \item{n.rep}{a numeric vector of length \eqn{J = J.x \times J.y}{J = J.x x J.y} indicating the number of repeat visits at each of the \eqn{J}{J} sites.}
 
@@ -81,17 +81,15 @@ simFPOcc(J.x, J.y, n.rep, n.rep.max, beta, gamma, delta, psi.RE = list(),
   \item{X.mu}{a three-dimensional numeric array with dimensions corresponding to sites, repeat visits, and number of true positive rate regression coefficients. This is the design matrix used for the true positive rate sub-model of the occupancy model.}
   \item{X.omega}{a three-dimensional numeric array with dimensions corresponding to sites, repeat visits, and number of false positive rate regression coefficients. This is the design matrix used for the false positive rate sub-model of the occupancy model.}
   \item{coords}{a matrix of coordiantes of each occupancy site, with the rows corresponding to a unique spatial coordinate and the columns corresponding to the easting and northing, respectively. This will be identical to coords.full unless \code{grid} is specified as an argument.}
-  \item{coords.full}{a \eqn{J \times 2}{J x 2} numeric matrix of coordinates of each occupancy site. Required for spatial models. Note that this may contain repeated coordinates if setting \code{grid} as an function argument.}
+  \item{coords.full}{a \eqn{J \times 2}{J x 2} numeric matrix of coordinates of each occupancy site. Required for spatial models. Note that this may contain repeated coordinates if setting \code{grid} as a function argument.}
   \item{w}{a matrix of the spatial random effect values for each site. The number of columns is determined by the \code{svc.cols} argument (the number of spatially-varying coefficients).}
   \item{psi}{a \eqn{J \times 1}{J x 1} matrix of the occupancy probabilities for each site.}
   \item{z}{a length \eqn{J}{J} vector of the latent occupancy states at each site.}
   \item{mu}{a \code{J x max(n.rep)} matrix of the true positive rates for each site and replicate combination. Sites with fewer than \code{max(n.rep)} replicates will contain \code{NA} values.}
   \item{omega}{a \code{J x max(n.rep)} matrix of the false positive rates for each site and replicate combination. Sites with fewer than \code{max(n.rep)} replicates will contain \code{NA} values.}
-  \item{y}{a \code{J x max(n.rep)} matrix of the raw detection-nondetection data for each site and replicate combination.}
+  \item{y}{a \code{J x max(n.rep)} matrix of the raw observation data for each site and replicate combination. Note this differs from stand occupancy models without false positivies in spOccupancy in that \code{y} now obtains count values (e.g., number of vocalizations detected by some artificial intelligence algorithm) as opposed to detection-nondetection data.}
   \item{n.val}{a \code{J x max(n.rep)} matrix of the number of human-validated signals at each site and replicate combination.}
   \item{d}{a \code{J x max(n.rep)} matrix of the number of human-validated signals at each site and replicate combination that were validated to be true.}
-  \item{D}{a \code{J x max(n.rep)} matrix of the total number of true positive signals at each site and replicate combination.}
-  \item{Q}{a \code{J x max(n.rep)} matrix of the total number of false positive signalst at each site and replicate combination.}
   \item{X.mu.re}{a three-dimensional numeric array containing the levels of any true positive rate random effect included in the model. Only relevant when true positive rate random effects are specified in \code{mu.RE}.}
   \item{X.omega.re}{a three-dimensional numeric array containing the levels of any false positive rate random effect included in the model. Only relevant when false positive rate random effects are specified in \code{omega.RE}.}
   \item{X.re}{a numeric matrix containing the levels of any occurrence random effect included in the model. Only relevant when occurrence random effects are specified in \code{psi.RE}.}

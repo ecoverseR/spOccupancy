@@ -1,5 +1,5 @@
 simFPOcc <- function(J.x, J.y, n.rep, n.rep.max, beta, gamma, delta, 
-                     psi.RE = list(), mu.RE = list(), omega.RE = omega.RE, 
+                     psi.RE = list(), mu.RE = list(), omega.RE = list(), 
                      sp = FALSE, svc.cols = 1, cov.model, sigma.sq, phi, nu, 
                      x.positive = FALSE, grid, prop.val, kappa, family = "Poisson", ...) {
 
@@ -400,10 +400,6 @@ simFPOcc <- function(J.x, J.y, n.rep, n.rep.max, beta, gamma, delta,
   n.val <- matrix(NA, nrow = J, ncol = n.rep.max)
   # Number of true positive of validated samples (observed)
   d <- matrix(NA, nrow = J, ncol = n.rep.max)
-  # Latent number of true positives
-  D <- matrix(NA, nrow = J, ncol = n.rep.max)
-  # Latent number of false positives
-  Q <- matrix(NA, nrow = J, ncol = n.rep.max)
 
   # Generate data and latent vocalization processes
   for (j in 1:J) {
@@ -427,24 +423,20 @@ simFPOcc <- function(J.x, J.y, n.rep, n.rep.max, beta, gamma, delta,
     } else if (family == "NB") {
       y[j, rep.indx[[j]]] <- rnbinom(n.rep[j], size = kappa, mu = mu[j, rep.indx[[j]]] * z[j] + omega[j, rep.indx[[j]]])
     }
-    # Get total true positives at each site. 
-    D[j, rep.indx[[j]]] <- rbinom(n.rep[j], 
-                                  y[j, rep.indx[[j]]],
-                                  (mu[j, rep.indx[[j]]] * z[j]) / (mu[j, rep.indx[[j]]] * z[j] + omega[j, rep.indx[[j]]])) 
-
-    # Get total false positives
-    Q[j, rep.indx[[j]]] <- y[j, rep.indx[[j]]] - D[j, rep.indx[[j]]]
-    
+    # Probability a given detection is a true positive
+    tp.prob <- (mu[j, rep.indx[[j]]] * z[j]) /
+               (mu[j, rep.indx[[j]]] * z[j] + omega[j, rep.indx[[j]]])
     # Number of vocalizations at the current site/rep to be validated
     n.val[j, rep.indx[[j]]] <- round(prop.val * y[j, rep.indx[[j]]])
-    d[j, rep.indx[[j]]] <- rhyper(n.rep[j], D[j, rep.indx[[j]]], Q[j, rep.indx[[j]]], n.val[j, rep.indx[[j]]])
+    # Number of validated detections that are true positives
+    d[j, rep.indx[[j]]] <- rbinom(n.rep[j], n.val[j, rep.indx[[j]]], tp.prob)
   }
 
 
   return(
     list(X = X, X.mu = X.mu, X.omega = X.omega, coords = coords, coords.full = coords.full,
          w = w.mat.full, w.grid = w.mat, psi = psi, z = z, mu = mu, y = y, 
-         omega = omega, n.val = n.val, d = d, D = D, Q = Q, X.mu.re = X.mu.re, X.re = X.re, 
+         omega = omega, n.val = n.val, d = d, X.mu.re = X.mu.re, X.re = X.re, 
          X.omega.re = X.omega.re, X.w = X.w, gamma.star = gamma.star, 
          delta.star = delta.star, beta.star = beta.star)
   )

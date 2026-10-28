@@ -329,7 +329,6 @@ summary.PGOcc <- function(object,
     print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
   }
 
-  # if (class(object) == 'tPGOcc') {
   if (is(object, 'tPGOcc')) {
     if (object$ar1) {
       cat("\n")
@@ -404,7 +403,20 @@ summary.ppcOcc <- function(object, level = 'both',
     cat("Fit statistic: ", object$fit.stat, "\n")
   }
 
-  if (object$class %in% c('msPGOcc', 'spMsPGOcc', 'lfMsPGOcc', 'sfMsPGOcc', 
+  if (object$class %in% c('fpPGOcc')) {
+    cat("----------------------------------------\n");
+    cat("\tDetection data (y)\n");
+    cat("----------------------------------------\n");
+    cat("Bayesian p-value: ", round(mean(object$fit.y.rep > object$fit.y), digits), "\n")
+    cat("\n")
+    cat("----------------------------------------\n");
+    cat("\tValidation data (d)\n");
+    cat("----------------------------------------\n");
+    cat("Bayesian p-value: ", round(mean(object$fit.d.rep > object$fit.d), digits), "\n")
+    cat("Fit statistic: ", object$fit.stat, "\n")
+  }
+
+  if (object$class %in% c('msPGOcc', 'spMsPGOcc', 'lfMsPGOcc', 'sfMsPGOcc',
 			  'svcMsPGOcc')) {
 
     if (tolower(level) == 'community') {
@@ -5598,5 +5610,428 @@ predict.svcTIntPGOcc <- function(object, X.0, coords.0, t.cols,
     out <- predict.tIntPGOcc(object, X.0, t.cols, ignore.RE, type)
   }
   class(out) <- "predict.svcTIntPGOcc"
+  out
+}
+
+
+# fpPGOcc -----------------------------------------------------------------
+print.fpPGOcc <- function(x, ...) {
+  cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.75)),
+      "", sep = "\n")
+}
+
+summary.fpPGOcc <- function(object,
+                            quantiles = c(0.025, 0.5, 0.975),
+                            digits = max(3L, getOption("digits") - 3L), ...) {
+  print(object)
+
+  n.post <- object$n.post
+  n.samples <- object$n.samples
+  n.burn <- object$n.burn
+  n.thin <- object$n.thin
+  n.chains <- object$n.chains
+  run.time <- object$run.time[3] / 60 # minutes
+
+  cat(paste("Samples per Chain: ", n.samples,"\n", sep=""))
+  cat(paste("Burn-in: ", n.burn,"\n", sep=""))
+  cat(paste("Thinning Rate: ",n.thin,"\n", sep=""))
+  cat(paste("Number of Chains: ", n.chains, "\n", sep = ""))
+  cat(paste("Total Posterior Samples: ",n.post * n.chains,"\n", sep=""))
+  cat(paste("Run Time (min): ", round(run.time, digits), "\n\n", sep = ""))
+
+  # Occurrence
+  cat("Occurrence (logit scale): \n")
+  tmp.1 <- t(apply(object$beta.samples, 2,
+                   function(x) c(mean(x), sd(x))))
+  colnames(tmp.1) <- c("Mean", "SD")
+  tmp <- t(apply(object$beta.samples, 2,
+                 function(x) quantile(x, prob = quantiles)))
+  diags <- matrix(c(object$rhat$beta, round(object$ESS$beta, 0)), ncol = 2)
+  colnames(diags) <- c('Rhat', 'ESS')
+  print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+  if (object$psiRE) {
+    cat("\n")
+    cat("Occurrence Random Effect Variances (logit scale): \n")
+    tmp.1 <- t(apply(object$sigma.sq.psi.samples, 2,
+                     function(x) c(mean(x), sd(x))))
+    colnames(tmp.1) <- c("Mean", "SD")
+    tmp <- t(apply(object$sigma.sq.psi.samples, 2,
+                   function(x) quantile(x, prob = quantiles)))
+    diags <- matrix(c(object$rhat$sigma.sq.psi, round(object$ESS$sigma.sq.psi, 0)), ncol = 2)
+    colnames(diags) <- c('Rhat', 'ESS')
+    print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+  }
+  cat("\n")
+  # True positive detection
+  cat("True Positive Detection (log scale): \n")
+  tmp.1 <- t(apply(object$gamma.samples, 2,
+                   function(x) c(mean(x), sd(x))))
+  colnames(tmp.1) <- c("Mean", "SD")
+  tmp <- t(apply(object$gamma.samples, 2,
+                 function(x) quantile(x, prob = quantiles)))
+  diags <- matrix(c(object$rhat$gamma, round(object$ESS$gamma, 0)), ncol = 2)
+  colnames(diags) <- c('Rhat', 'ESS')
+  print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+  if (object$muRE) {
+    cat("\n")
+    cat("True Positive Detection Random Effect Variances (log scale): \n")
+    tmp.1 <- t(apply(object$sigma.sq.mu.samples, 2,
+                     function(x) c(mean(x), sd(x))))
+    colnames(tmp.1) <- c("Mean", "SD")
+    tmp <- t(apply(object$sigma.sq.mu.samples, 2,
+                   function(x) quantile(x, prob = quantiles)))
+    diags <- matrix(c(object$rhat$sigma.sq.mu, round(object$ESS$sigma.sq.mu, 0)), ncol = 2)
+    colnames(diags) <- c('Rhat', 'ESS')
+    print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+  }
+  cat("\n")
+  # False positive detection
+  cat("False Positive Detection (log scale): \n")
+  tmp.1 <- t(apply(object$delta.samples, 2,
+                   function(x) c(mean(x), sd(x))))
+  colnames(tmp.1) <- c("Mean", "SD")
+  tmp <- t(apply(object$delta.samples, 2,
+                 function(x) quantile(x, prob = quantiles)))
+  diags <- matrix(c(object$rhat$delta, round(object$ESS$delta, 0)), ncol = 2)
+  colnames(diags) <- c('Rhat', 'ESS')
+  print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+  if (object$omegaRE) {
+    cat("\n")
+    cat("False Positive Detection Random Effect Variances (log scale): \n")
+    tmp.1 <- t(apply(object$sigma.sq.omega.samples, 2,
+                     function(x) c(mean(x), sd(x))))
+    colnames(tmp.1) <- c("Mean", "SD")
+    tmp <- t(apply(object$sigma.sq.omega.samples, 2,
+                   function(x) quantile(x, prob = quantiles)))
+    diags <- matrix(c(object$rhat$sigma.sq.omega, round(object$ESS$sigma.sq.omega, 0)), ncol = 2)
+    colnames(diags) <- c('Rhat', 'ESS')
+    print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+  }
+}
+
+# Internal: posterior true positive (mu) and false positive (omega) rates and
+# latent z for the observed site/visit combinations, for posterior draws indx.
+# Returns n.obs x length(indx) matrices, plus the index of the observed cells
+# in c(y) (ordered by site then visit).
+fpPGOccRates <- function(object, indx) {
+  y <- object$y
+  J <- nrow(y)
+  K.max <- ncol(y)
+  names.long <- which(!is.na(c(y)))
+  z.long.indx <- rep(1:J, K.max)[names.long]
+  # True positive rate (log scale)
+  log.mu <- object$X.mu %*% t(object$gamma.samples[indx, , drop = FALSE])
+  if (object$muRE) {
+    # Add 1 to get it to R indexing.
+    X.mu.re <- object$X.mu.re + 1
+    for (i in 1:ncol(X.mu.re)) {
+      log.mu <- log.mu + t(object$gamma.star.samples[indx, X.mu.re[, i], drop = FALSE])
+    }
+  }
+  # False positive rate (log scale)
+  log.omega <- object$X.omega %*% t(object$delta.samples[indx, , drop = FALSE])
+  if (object$omegaRE) {
+    X.omega.re <- object$X.omega.re + 1
+    for (i in 1:ncol(X.omega.re)) {
+      log.omega <- log.omega + t(object$delta.star.samples[indx, X.omega.re[, i], drop = FALSE])
+    }
+  }
+  list(mu = exp(log.mu), omega = exp(log.omega),
+       z = t(object$z.samples[indx, z.long.indx, drop = FALSE]),
+       names.long = names.long)
+}
+
+# Internal: put an n.obs x n.draws matrix of observed cells back into an
+# n.draws x J x K.max array, with NA where y is missing.
+fpPGOccToArray <- function(a, names.long, J, K.max) {
+  tmp <- array(NA, dim = c(J * K.max, ncol(a)))
+  tmp[names.long, ] <- a
+  tmp <- array(tmp, dim = c(J, K.max, ncol(a)))
+  aperm(tmp, c(3, 1, 2))
+}
+
+# Internal: randomized quantile residuals (Dunn and Smyth 1996) for a discrete
+# distribution. log.lo = log F(y - 1), log.hi = log F(y), and log.lo.upper =
+# log P(Y >= y), log.hi.upper = log P(Y > y). Draws u ~ U(F(y - 1), F(y)) and
+# returns qnorm(u), working on the log scale in whichever tail is smaller so
+# that residuals far in either tail stay finite.
+quantResid <- function(log.lo, log.hi, log.lo.upper, log.hi.upper) {
+  log.sum.exp <- function(a, b) {
+    m <- pmax(a, b)
+    out <- m + log(exp(a - m) + exp(b - m))
+    out[m == -Inf] <- -Inf
+    out
+  }
+  v <- runif(length(log.lo))
+  # log(u) and log(1 - u) for the same uniform draw
+  log.u <- log.sum.exp(log1p(-v) + log.lo, log(v) + log.hi)
+  log.u.upper <- log.sum.exp(log(v) + log.hi.upper, log1p(-v) + log.lo.upper)
+  ifelse(log.u < log(0.5), qnorm(log.u, log.p = TRUE),
+         qnorm(log.u.upper, lower.tail = FALSE, log.p = TRUE))
+}
+
+fitted.fpPGOcc <- function(object, ...) {
+  # Check for unused arguments ------------------------------------------
+  formal.args <- names(formals(sys.function(sys.parent())))
+  elip.args <- names(list(...))
+  for(i in elip.args){
+      if(! i %in% formal.args)
+          warning("'",i, "' is not an argument")
+  }
+  # Call ----------------------------------------------------------------
+  cl <- match.call()
+
+  # Some initial checks -------------------------------------------------
+  # Object ----------------------------
+  if (missing(object)) {
+    stop("object must be specified")
+  }
+  n.post <- object$n.post * object$n.chains
+  J <- nrow(object$y)
+  K.max <- ncol(object$y)
+
+  # Replicate data for the observed cells (n.obs x n.post) --------------
+  rep.long <- fpPGOccRep(object, 1:n.post)
+  names.long <- rep.long$names.long
+
+  # Put back into n.post x J x K.max arrays, NA where y is missing ------
+  out <- list()
+  out$y.rep.samples <- fpPGOccToArray(rep.long$y.rep, names.long, J, K.max)
+  out$d.rep.samples <- fpPGOccToArray(rep.long$d.rep, names.long, J, K.max)
+  out$mu.samples <- fpPGOccToArray(rep.long$mu, names.long, J, K.max)
+  out$omega.samples <- fpPGOccToArray(rep.long$omega, names.long, J, K.max)
+  return(out)
+}
+
+# Internal: replicate data sets for fpPGOcc at the observed site/visit cells,
+# for posterior draws indx. Returns the output of fpPGOccRates() plus
+# n.obs x length(indx) matrices of the Poisson mean (lambda), the true positive
+# probability (p.tp), and replicate y and d, along with n.val for the observed
+# cells. Replicates condition on the posterior draws of z, and d.rep conditions
+# on the observed number of validated signals n.val.
+fpPGOccRep <- function(object, indx) {
+  rates <- fpPGOccRates(object, indx)
+  n.obs <- length(rates$names.long)
+  n.draws <- length(indx)
+  # y ~ Poisson(z * mu + omega)
+  lambda <- rates$z * rates$mu + rates$omega
+  # d ~ Binomial(n.val, z * mu / (z * mu + omega))
+  p.tp <- rates$z * rates$mu / lambda
+  n.val.long <- c(object$n.val)[rates$names.long]
+  y.rep <- matrix(rpois(n.obs * n.draws, lambda), n.obs, n.draws)
+  d.rep <- matrix(rbinom(n.obs * n.draws, n.val.long, p.tp), n.obs, n.draws)
+  c(rates, list(lambda = lambda, p.tp = p.tp, n.val = n.val.long,
+                y.rep = y.rep, d.rep = d.rep))
+}
+
+residuals.fpPGOcc <- function(object, n.post.samples = 100, type = 'quantile', ...) {
+  # Check for unused arguments ------------------------------------------
+  formal.args <- names(formals(sys.function(sys.parent())))
+  elip.args <- names(list(...))
+  for(i in elip.args){
+      if(! i %in% formal.args)
+          warning("'",i, "' is not an argument")
+  }
+  # Call ----------------------------------------------------------------
+  cl <- match.call()
+
+  # Some initial checks -------------------------------------------------
+  if (missing(object)) {
+    stop("object must be specified")
+  }
+  if (!(class(object) %in% c('fpPGOcc'))) {
+    stop('object must be of class fpPGOcc')
+  }
+  if (!(type %in% c('quantile', 'pearson', 'response'))) {
+    stop("type must be one of 'quantile', 'pearson', or 'response'")
+  }
+  n.post <- object$n.post * object$n.chains
+  if (n.post.samples > n.post) {
+    stop("n.post.samples cannot be larger than the total number of posterior samples (",
+         n.post, ")")
+  }
+  J <- nrow(object$y)
+  K.max <- ncol(object$y)
+  # Generate sub-sample of MCMC samples if relevant
+  indx <- sample(1:n.post, n.post.samples, replace = FALSE)
+
+  # Occupancy residuals -------------------------------------------------
+  occ.resids <- object$z.samples[indx, , drop = FALSE] -
+                object$psi.samples[indx, , drop = FALSE]
+
+  # Rates for the sub-sampled draws (n.obs x n.post.samples) ------------
+  rates <- fpPGOccRates(object, indx)
+  names.long <- rates$names.long
+  n.obs <- length(names.long)
+  lambda <- rates$z * rates$mu + rates$omega
+  y.long <- matrix(c(object$y)[names.long], n.obs, n.post.samples)
+  n.val.long <- matrix(c(object$n.val)[names.long], n.obs, n.post.samples)
+  d.long <- matrix(c(object$d)[names.long], n.obs, n.post.samples)
+  # True positive probability for validation data.
+  p.tp <- rates$z * rates$mu / lambda
+
+  # Detection residuals: y ~ Poisson(z * mu + omega) --------------------
+  # Defined for every observed site/visit, since y is not degenerate when z = 0.
+  if (type == 'quantile') {
+    det.resids <- quantResid(ppois(y.long - 1, lambda, log.p = TRUE),
+                             ppois(y.long, lambda, log.p = TRUE),
+                             ppois(y.long - 1, lambda, lower.tail = FALSE, log.p = TRUE),
+                             ppois(y.long, lambda, lower.tail = FALSE, log.p = TRUE))
+  } else if (type == 'pearson') {
+    det.resids <- (y.long - lambda) / sqrt(lambda)
+  } else {
+    det.resids <- y.long - lambda
+  }
+  det.resids <- matrix(det.resids, n.obs, n.post.samples)
+
+  # Validation residuals: d ~ Binomial(n.val, z * mu / (z * mu + omega)) -
+  # Only defined when z = 1 and n.val > 0. Otherwise d = 0 with probability 1.
+  if (type == 'quantile') {
+    val.resids <- quantResid(pbinom(d.long - 1, n.val.long, p.tp, log.p = TRUE),
+                             pbinom(d.long, n.val.long, p.tp, log.p = TRUE),
+                             pbinom(d.long - 1, n.val.long, p.tp, lower.tail = FALSE,
+                                    log.p = TRUE),
+                             pbinom(d.long, n.val.long, p.tp, lower.tail = FALSE,
+                                    log.p = TRUE))
+  } else if (type == 'pearson') {
+    val.resids <- (d.long - n.val.long * p.tp) /
+                  sqrt(n.val.long * p.tp * (1 - p.tp))
+  } else {
+    val.resids <- d.long - n.val.long * p.tp
+  }
+  val.resids <- matrix(val.resids, n.obs, n.post.samples)
+  val.resids[rates$z == 0 | n.val.long == 0] <- NA
+
+  out <- list(occ.resids = occ.resids,
+              det.resids = fpPGOccToArray(det.resids, names.long, J, K.max),
+              val.resids = fpPGOccToArray(val.resids, names.long, J, K.max))
+  out
+}
+
+# Internal: posterior samples of a linear predictor at new locations for one
+# component of fpPGOcc (occupancy, true positive, or false positive). For
+# random effect levels in X.0 that were not in the fitted data, the effect is
+# drawn from its prior N(0, sigma.sq) for each posterior sample. Returns an
+# n.post x nrow(X.0) matrix on the link scale.
+fpPGOccPredLinear <- function(X.0, fix.samples, star.samples, sigma.sq.samples,
+                              re.level.names, X.re.fit, has.re, ignore.RE,
+                              covs.name) {
+  n.post <- nrow(fix.samples)
+  p.fix <- ncol(fix.samples)
+  p.design <- p.fix
+  if (has.re & !ignore.RE) {
+    p.design <- p.fix + ncol(sigma.sq.samples)
+  }
+  if (ncol(X.0) != p.design) {
+    stop(paste("X.0 must have ", p.design, " columns\n", sep = ''))
+  }
+  if (has.re & !ignore.RE) {
+    p.re <- length(re.level.names)
+    # Get columns in design matrix with random effects
+    x.re.names <- colnames(X.re.fit)
+    indx <- match(x.re.names, colnames(X.0))
+    if (sum(is.na(indx)) > 0) {
+      stop("column names in X.0 must match variable names in data$", covs.name)
+    }
+    X.re <- as.matrix(X.0[, indx, drop = FALSE])
+    X.fix <- as.matrix(X.0[, -indx, drop = FALSE])
+    X.re.ind <- matrix(NA, nrow(X.re), p.re)
+    for (i in 1:p.re) {
+      for (j in 1:nrow(X.re)) {
+        tmp <- which(re.level.names[[i]] == X.re[j, i])
+        if (length(tmp) > 0) {
+          if (i > 1) {
+            X.re.ind[j, i] <- tmp + sum(sapply(re.level.names[1:(i - 1)], length))
+          } else {
+            X.re.ind[j, i] <- tmp
+          }
+        }
+      }
+    }
+    # Random effects at each new location
+    star.sites.0.samples <- matrix(0, n.post, nrow(X.re))
+    for (t in 1:p.re) {
+      for (j in 1:nrow(X.re)) {
+        if (!is.na(X.re.ind[j, t])) {
+          star.sites.0.samples[, j] <- star.samples[, X.re.ind[j, t]] +
+                                       star.sites.0.samples[, j]
+        } else {
+          star.sites.0.samples[, j] <- rnorm(n.post, 0, sqrt(sigma.sq.samples[, t])) +
+                                       star.sites.0.samples[, j]
+        }
+      } # j
+    } # t
+  } else {
+    X.fix <- X.0
+    star.sites.0.samples <- matrix(0, n.post, nrow(X.0))
+  }
+  t(X.fix %*% t(fix.samples) + t(star.sites.0.samples))
+}
+
+predict.fpPGOcc <- function(object, X.0, ignore.RE = FALSE,
+                            type = 'occupancy', ...) {
+  # Check for unused arguments ------------------------------------------
+  formal.args <- names(formals(sys.function(sys.parent())))
+  elip.args <- names(list(...))
+  for(i in elip.args){
+      if(! i %in% formal.args)
+          warning("'",i, "' is not an argument")
+  }
+  # Call ----------------------------------------------------------------
+  cl <- match.call()
+
+  # Functions ---------------------------------------------------------------
+  logit.inv <- function(z, a = 0, b = 1) {b-(b-a)/(1+exp(z))}
+
+  # Some initial checks ---------------------------------------------------
+  if (missing(object)) {
+    stop("predict expects object\n")
+  }
+  type <- tolower(type)
+  if (!(type %in% c('occupancy', 'true positive', 'false positive'))) {
+    stop("prediction type must be one of 'occupancy', 'true positive', or 'false positive'")
+  }
+
+  # Check X.0 -------------------------------------------------------------
+  if (missing(X.0)) {
+    stop("X.0 must be specified\n")
+  }
+  if (!any(is.data.frame(X.0), is.matrix(X.0))) {
+    stop("X.0 must be a data.frame or matrix\n")
+  }
+  X.0 <- as.matrix(X.0)
+  n.post <- object$n.post * object$n.chains
+  out <- list()
+
+  # Occurrence predictions (logit link) -----------------------------------
+  if (type == 'occupancy') {
+    lin.0 <- fpPGOccPredLinear(X.0, as.matrix(object$beta.samples),
+                               object$beta.star.samples, object$sigma.sq.psi.samples,
+                               object$re.level.names, object$X.re,
+                               object$psiRE, ignore.RE, 'occ.covs')
+    out$psi.0.samples <- mcmc(logit.inv(lin.0))
+    out$z.0.samples <- mcmc(matrix(rbinom(length(out$psi.0.samples), 1,
+                                          c(out$psi.0.samples)),
+                                   nrow = n.post, ncol = nrow(X.0)))
+  }
+  # True positive rate predictions (log link) -----------------------------
+  if (type == 'true positive') {
+    lin.0 <- fpPGOccPredLinear(X.0, as.matrix(object$gamma.samples),
+                               object$gamma.star.samples, object$sigma.sq.mu.samples,
+                               object$mu.re.level.names, object$X.mu.re,
+                               object$muRE, ignore.RE, 'tp.det.covs')
+    out$mu.0.samples <- mcmc(exp(lin.0))
+  }
+  # False positive rate predictions (log link) ----------------------------
+  if (type == 'false positive') {
+    lin.0 <- fpPGOccPredLinear(X.0, as.matrix(object$delta.samples),
+                               object$delta.star.samples, object$sigma.sq.omega.samples,
+                               object$omega.re.level.names, object$X.omega.re,
+                               object$omegaRE, ignore.RE, 'fp.det.covs')
+    out$omega.0.samples <- mcmc(exp(lin.0))
+  }
+  out$call <- cl
+
+  class(out) <- "predict.fpPGOcc"
   out
 }

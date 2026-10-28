@@ -17,7 +17,7 @@ waicOcc(object, by.sp = FALSE, ...)
   \code{sfJSDM}, \code{lfMsPGOcc}, \code{sfMsPGOcc}, \code{tPGOcc}, \code{stPGOcc}, 
   \code{svcPGBinom}, \code{svcPGOcc}, \code{svcTPGBinom}, \code{svcTPGOcc}, or 
   \code{intMsPGOcc}, \code{svcMsPGOcc}, \code{tMsPGOcc}, \code{stMsPGOcc}, 
-  \code{svcTMsPGOcc}.}
+  \code{svcTMsPGOcc}, \code{fpPGOcc}.}
 
   \item{by.sp}{a logical value indicating whether to return a separate WAIC
                value for each species in a multi-species occupancy model or 
@@ -48,7 +48,7 @@ waicOcc(object, by.sp = FALSE, ...)
 }
 
 \value{
-  When \code{object} is of class \code{PGOcc}, \code{spPGOcc}, \code{msPGOcc}, \code{spMsPGOcc}, \code{lfJSDM}, \code{sfJSDM}, \code{lfMsPGOcc}, \code{sfMsPGOcc}, \code{tPGOcc}, \code{stPGOcc}, \code{svcPGBinom}, \code{svcPGOcc}, \code{svcTPGOcc}, \code{svcTPGBinom}, \code{svcMsPGOcc}, \code{tMsPGOcc}, \code{stMsPGOcc}, \code{svcTMsPGOcc} 
+  When \code{object} is of class \code{PGOcc}, \code{spPGOcc}, \code{msPGOcc}, \code{spMsPGOcc}, \code{lfJSDM}, \code{sfJSDM}, \code{lfMsPGOcc}, \code{sfMsPGOcc}, \code{tPGOcc}, \code{stPGOcc}, \code{svcPGBinom}, \code{svcPGOcc}, \code{svcTPGOcc}, \code{svcTPGBinom}, \code{svcMsPGOcc}, \code{tMsPGOcc}, \code{stMsPGOcc}, \code{svcTMsPGOcc}, \code{fpPGOcc}
   returns a vector with three elements corresponding to 
   estimates of the expected log pointwise predictive density (elpd), the 
   effective number of parameters (pD), and the WAIC. When \code{by.sp = TRUE} for multi-species models, object is a data frame with each row corresponding to a different species. When \code{object} is 

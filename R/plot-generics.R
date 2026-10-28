@@ -3,10 +3,13 @@ overallPlot <- function(x, param, density = TRUE, ...) {
   n.chains <- x$n.chains
   curr.samples <- vector(mode = 'list', length = n.chains) 
   indx <- 1:n.post
+  # Models with a false positive detection process (true positive rate mu
+  # with coefficients gamma, false positive rate omega with coefficients delta).
+  fp.classes <- c('fpPGOcc')
   if (param == 'beta.comm') {
-    if (class(x) %in% c('PGOcc', 'spPGOcc', 'intPGOcc', 'spIntPGOcc', 
-			'tPGOcc', 'stPGOcc', 'svcPGOcc', 'svcTPGOcc', 
-			'svcTPGBinom', 'svcPGBinom')) {
+    if (class(x) %in% c('PGOcc', 'spPGOcc', 'intPGOcc', 'spIntPGOcc',
+			'tPGOcc', 'stPGOcc', 'svcPGOcc', 'svcTPGOcc',
+			'svcTPGBinom', 'svcPGBinom', fp.classes)) {
       stop("beta.comm is not a parameter in the fitted model")
     }
     for (i in 1:n.chains) {
@@ -17,7 +20,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
   if (param == 'tau.sq.beta') {
     if (class(x) %in% c('PGOcc', 'spPGOcc', 'intPGOcc', 'spIntPGOcc', 
 			'tPGOcc', 'stPGOcc', 'svcPGOcc', 'svcTPGOcc', 
-			'svcTPGBinom', 'svcPGBinom')) {
+			'svcTPGBinom', 'svcPGBinom', fp.classes)) {
       stop("tau.sq.beta is not a parameter in the fitted model")
     }
     for (i in 1:n.chains) {
@@ -29,7 +32,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
     if (class(x) %in% c('PGOcc', 'spPGOcc', 'intPGOcc', 'spIntPGOcc', 
 			'tPGOcc', 'stPGOcc', 'svcPGOcc', 'svcTPGOcc', 
 			'svcTPGBinom', 'svcPGBinom', 'msPGOcc', 'spMsPGOcc', 'intMsPGOcc', 
-			'tMsPGOcc')) {
+			'tMsPGOcc', fp.classes)) {
       stop("lambda is not a parameter in the fitted model")
     }
     for (i in 1:n.chains) {
@@ -40,7 +43,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
   if (param == 'alpha.comm') {
     if (class(x) %in% c('PGOcc', 'spPGOcc', 'intPGOcc', 'spIntPGOcc', 
 			'tPGOcc', 'stPGOcc', 'svcPGOcc', 'svcTPGOcc', 
-			'svcTPGBinom', 'svcPGBinom', 'lfJSDM', 'sfJSDM')) {
+			'svcTPGBinom', 'svcPGBinom', 'lfJSDM', 'sfJSDM', fp.classes)) {
       stop("alpha.comm is not a parameter in the fitted model")
     }
     for (i in 1:n.chains) {
@@ -51,7 +54,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
   if (param == 'tau.sq.alpha') {
     if (class(x) %in% c('PGOcc', 'spPGOcc', 'intPGOcc', 'spIntPGOcc', 
 			'tPGOcc', 'stPGOcc', 'svcPGOcc', 'svcTPGOcc', 
-			'svcTPGBinom', 'svcPGBinom', 'lfJSDM', 'sfJSDM')) {
+			'svcTPGBinom', 'svcPGBinom', 'lfJSDM', 'sfJSDM', fp.classes)) {
       stop("tau.sq.alpha is not a parameter in the fitted model")
     }
     for (i in 1:n.chains) {
@@ -78,7 +81,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
     }
   }
   if (param == 'alpha') {
-    if (class(x) %in% c('svcPGBinom', 'svcTPGBinom', 'lfJSDM', 'sfJSDM')) {
+    if (class(x) %in% c('svcPGBinom', 'svcTPGBinom', 'lfJSDM', 'sfJSDM', fp.classes)) {
       stop("alpha is not a parameter in the fitted model")
     }
     for (i in 1:n.chains) {
@@ -96,7 +99,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
     }
   }
   if (param == 'sigma.sq.p') {
-    if (class(x) %in% c('svcPGBinom', 'svcTPGBinom', 'lfJSDM', 'sfJSDM')) {
+    if (class(x) %in% c('svcPGBinom', 'svcTPGBinom', 'lfJSDM', 'sfJSDM', fp.classes)) {
       stop("sigma.sq.p is not a parameter in the fitted model")
     }
     if (!x$pRE) {
@@ -117,7 +120,7 @@ overallPlot <- function(x, param, density = TRUE, ...) {
     }
   }
   if (param == 'alpha.star') {
-    if (class(x) %in% c('svcPGBinom', 'svcTPGBinom', 'lfJSDM', 'sfJSDM')) {
+    if (class(x) %in% c('svcPGBinom', 'svcTPGBinom', 'lfJSDM', 'sfJSDM', fp.classes)) {
       stop("alpha.star is not a parameter in the fitted model")
     }
     if (!x$pRE) {
@@ -125,6 +128,61 @@ overallPlot <- function(x, param, density = TRUE, ...) {
     }
     for (i in 1:n.chains) {
       curr.samples[[i]] <- coda::mcmc(x$alpha.star.samples[indx, , drop = FALSE])
+      indx <- (n.post * i + 1):(n.post * (i + 1))
+    }
+  }
+  # False positive model parameters ---------------------------------------
+  if (param == 'gamma') {
+    if (!(class(x) %in% fp.classes)) {
+      stop("gamma is not a parameter in the fitted model")
+    }
+    for (i in 1:n.chains) {
+      curr.samples[[i]] <- coda::mcmc(x$gamma.samples[indx, , drop = FALSE])
+      indx <- (n.post * i + 1):(n.post * (i + 1))
+    }
+  }
+  if (param == 'delta') {
+    if (!(class(x) %in% fp.classes)) {
+      stop("delta is not a parameter in the fitted model")
+    }
+    for (i in 1:n.chains) {
+      curr.samples[[i]] <- coda::mcmc(x$delta.samples[indx, , drop = FALSE])
+      indx <- (n.post * i + 1):(n.post * (i + 1))
+    }
+  }
+  if (param == 'sigma.sq.mu') {
+    if (!(class(x) %in% fp.classes) || !x$muRE) {
+      stop("sigma.sq.mu is not a parameter in the fitted model")
+    }
+    for (i in 1:n.chains) {
+      curr.samples[[i]] <- coda::mcmc(x$sigma.sq.mu.samples[indx, , drop = FALSE])
+      indx <- (n.post * i + 1):(n.post * (i + 1))
+    }
+  }
+  if (param == 'sigma.sq.omega') {
+    if (!(class(x) %in% fp.classes) || !x$omegaRE) {
+      stop("sigma.sq.omega is not a parameter in the fitted model")
+    }
+    for (i in 1:n.chains) {
+      curr.samples[[i]] <- coda::mcmc(x$sigma.sq.omega.samples[indx, , drop = FALSE])
+      indx <- (n.post * i + 1):(n.post * (i + 1))
+    }
+  }
+  if (param == 'gamma.star') {
+    if (!(class(x) %in% fp.classes) || !x$muRE) {
+      stop("the model was not fit with any true positive detection random effects (gamma.star)")
+    }
+    for (i in 1:n.chains) {
+      curr.samples[[i]] <- coda::mcmc(x$gamma.star.samples[indx, , drop = FALSE])
+      indx <- (n.post * i + 1):(n.post * (i + 1))
+    }
+  }
+  if (param == 'delta.star') {
+    if (!(class(x) %in% fp.classes) || !x$omegaRE) {
+      stop("the model was not fit with any false positive detection random effects (delta.star)")
+    }
+    for (i in 1:n.chains) {
+      curr.samples[[i]] <- coda::mcmc(x$delta.star.samples[indx, , drop = FALSE])
       indx <- (n.post * i + 1):(n.post * (i + 1))
     }
   }
@@ -202,5 +260,8 @@ plot.stIntPGOcc <- function(x, param, density = TRUE, ...) {
   overallPlot(x, param, density)
 }
 plot.svcTIntPGOcc <- function(x, param, density = TRUE, ...) {
+  overallPlot(x, param, density)
+}
+plot.fpPGOcc <- function(x, param, density = TRUE, ...) {
   overallPlot(x, param, density)
 }

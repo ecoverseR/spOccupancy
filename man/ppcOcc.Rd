@@ -14,7 +14,8 @@ ppcOcc(object, fit.stat, group, ...)
 \item{object}{an object of class \code{PGOcc}, \code{spPGOcc}, \code{msPGOcc}, 
 \code{spMsPGOcc}, \code{intPGOcc}, \code{spIntPGOcc}, \code{lfMsPGOcc}, \code{sfMsPGOcc}, 
 \code{tPGOcc}, \code{stPGOcc}, \code{svcPGOcc}, \code{svcMsPGOcc}, \code{tMsPGOcc}, 
-\code{stMsPGOcc}, \code{svcTMsPGOcc}.}
+\code{stMsPGOcc}, \code{svcTMsPGOcc}, \code{tIntPGOcc}, \code{stIntPGOcc}, 
+\code{svcTIntPGOcc}, \code{fpPGOcc}.}
 
 \item{fit.stat}{a quoted keyword that specifies the fit statistic
 to use in the posterior predictive check. Supported fit statistics are
@@ -23,14 +24,23 @@ to use in the posterior predictive check. Supported fit statistics are
 \item{group}{a positive integer indicating the way to group the
 detection-nondetection data for the posterior predictive check. Value 
 1 will group values by row (site) and value 2 will group values by 
-column (replicate).} 
+column (replicate). For false-positive model objects only, value 0 performs
+the check on the individual site/replicate counts without grouping.} 
 
 \item{...}{currently no additional arguments}
 }
 
 \details{
   Standard GoF assessments are not valid for binary data, and posterior
-  predictive checks must be performed on some sort of binned data. 
+  predictive checks must be performed on some sort of binned data. This is
+  what is done for all occupancy models that input binary data.
+
+  For \code{fpPGOcc} objects, two separate checks are performed: one for 
+  the detection counts \eqn{y}, with expected value \eqn{z\mu + \omega}, and 
+  one for the validation data \eqn{d}, with expected value 
+  \eqn{n \cdot z\mu / (z\mu + \omega)}, where \eqn{n} is the observed number of 
+  validated signals. Because the detection data are counts, they do not 
+  need to be binned, and \code{group = 0} computes the fit statistic on each site/replicate count.
 }
 
 \author{
@@ -99,6 +109,27 @@ column (replicate).}
   with the additional dimension corresponding to primary sampling periods. When \code{object}
   is of class \code{tMsPGOcc}, \code{stMsPGOcc}, \code{svcTMsPGOcc}, this is a four-dimensional array
   with dimensions corresponding to quantile, species, grouping element, and primary time period.}
+
+  When \code{object} is of class \code{fpPGOcc}, \code{fit.y}, \code{fit.y.rep}, 
+  \code{fit.y.group.quants}, and \code{fit.y.rep.group.quants} correspond to 
+  the detection count data \eqn{y}. When \code{group = 0}, the group quantiles
+  are three-dimensional arrays with dimensions corresponding to quantile, site, 
+  and replicate, with \code{NA} values for missing site/replicate combinations.
+  The following additional elements are returned for the validation data \eqn{d}: 
+
+  \item{fit.d}{a numeric vector of posterior samples for the fit statistic 
+  calculated on the observed validation data.}
+
+  \item{fit.d.rep}{a numeric vector of posterior samples for the fit statistic 
+  calculated on replicate validation data generated from the model.}
+
+  \item{fit.d.group.quants}{posterior quantiles of the fit statistic using
+  the observed validation data for each unique element the fit statistic is 
+  calculated for, in the same format as \code{fit.y.group.quants}.}
+
+  \item{fit.d.rep.group.quants}{posterior quantiles of the fit statistic using
+  the replicate validation data for each unique element the fit statistic is 
+  calculated for, in the same format as \code{fit.y.group.quants}.}
 
   The return object will include additional objects used for 
   standard extractor functions. 

@@ -21,11 +21,11 @@
 extern "C" {
   SEXP fpPGOcc(SEXP y_r, SEXP X_r, SEXP Xmu_r, SEXP Xomega_r, SEXP XRE_r, 
                SEXP XmuRE_r, SEXP XomegaRE_r, SEXP d_r, SEXP nVal_r, 
-               SEXP consts_r, SEXP K_r, SEXP nOccRELong_r, SEXP nTPDetRELong_r, 
+               SEXP consts_r, SEXP nOccRELong_r, SEXP nTPDetRELong_r, 
                SEXP nFPDetRELong_r, SEXP betaStarting_r, SEXP gammaStarting_r, 
                SEXP deltaStarting_r, SEXP sigmaSqPsiStarting_r, SEXP sigmaSqMuStarting_r, 
                SEXP sigmaSqOmegaStarting_r, SEXP betaStarStarting_r, SEXP gammaStarStarting_r, 
-               SEXP deltaStarStarting_r, SEXP zStarting_r, SEXP DStarting_r, SEXP zLongIndx_r, 
+               SEXP deltaStarStarting_r, SEXP zStarting_r, SEXP zLongIndx_r, 
                SEXP betaStarIndx_r, SEXP betaLevelIndx_r, SEXP gammaStarIndx_r, 
                SEXP gammaLevelIndx_r, SEXP deltaStarIndx_r, SEXP deltaLevelIndx_r, 
                SEXP muBeta_r, SEXP muGamma_r, SEXP muDelta_r, 
@@ -71,6 +71,8 @@ extern "C" {
     int pFPDet = INTEGER(consts_r)[8];
     int pFPDetRE = INTEGER(consts_r)[9];
     int nFPDetRE = INTEGER(consts_r)[10];
+    int tpDetInt = INTEGER(consts_r)[11];
+    int fpDetInt = INTEGER(consts_r)[12];
     int ppTPDet = pTPDet * pTPDet;
     int ppFPDet = pFPDet * pFPDet;
     int ppOcc = pOcc * pOcc; 
@@ -95,7 +97,6 @@ extern "C" {
     int *nOccRELong = INTEGER(nOccRELong_r); 
     int *nTPDetRELong = INTEGER(nTPDetRELong_r); 
     int *nFPDetRELong = INTEGER(nFPDetRELong_r); 
-    double *K = REAL(K_r); 
     int *zLongIndx = INTEGER(zLongIndx_r); 
     int *gammaStarIndx = INTEGER(gammaStarIndx_r); 
     int *gammaLevelIndx = INTEGER(gammaLevelIndx_r);
@@ -196,10 +197,6 @@ extern "C" {
     double *z = (double *) R_alloc(J, sizeof(double));   
     F77_NAME(dcopy)(&J, REAL(zStarting_r), &inc, z, &inc);
 
-    // Latent Number of True Positives
-    double *D = (double *) R_alloc(nObs, sizeof(double));
-    F77_NAME(dcopy)(&nObs, REAL(DStarting_r), &inc, D, &inc);
-
     // Auxiliary variables
     double *omegaPGOcc = (double *) R_alloc(J, sizeof(double)); zeros(omegaPGOcc, J);
     double *kappaOcc = (double *) R_alloc(J, sizeof(double)); zeros(kappaOcc, J);
@@ -222,9 +219,6 @@ extern "C" {
     SEXP psiSamples_r; 
     PROTECT(psiSamples_r = Rf_allocMatrix(REALSXP, J, nPost)); nProtect++; 
     zeros(REAL(psiSamples_r), J * nPost);
-    SEXP DSamples_r; 
-    PROTECT(DSamples_r = Rf_allocMatrix(REALSXP, nObs, nPost)); nProtect++; 
-    zeros(REAL(DSamples_r), nObs * nPost);
     // True positive detection random effects
     SEXP sigmaSqMuSamples_r; 
     SEXP gammaStarSamples_r; 
@@ -262,20 +256,12 @@ extern "C" {
     ********************************************************************/
     int JpOcc = J * pOcc; 
     int JpOccRE = J * pOccRE; 
-    int nObspTPDet = nObs * pTPDet;
     int nObspTPDetRE = nObs * pTPDetRE;
-    int nObspFPDet = nObs * pFPDet;
     int nObspFPDetRE = nObs * pFPDetRE;
     double tmp_0, tmp_02; 
     double *tmp_one = (double *) R_alloc(inc, sizeof(double)); 
-    double *tmp_ppTPDet = (double *) R_alloc(ppTPDet, sizeof(double));
-    double *tmp_ppFPDet = (double *) R_alloc(ppFPDet, sizeof(double));
     double *tmp_ppOcc = (double *) R_alloc(ppOcc, sizeof(double)); 
-    double *tmp_pTPDet = (double *) R_alloc(pTPDet, sizeof(double));
-    double *tmp_pFPDet = (double *) R_alloc(pFPDet, sizeof(double));
     double *tmp_pOcc = (double *) R_alloc(pOcc, sizeof(double));
-    double *tmp_pTPDet2 = (double *) R_alloc(pTPDet, sizeof(double));
-    double *tmp_pFPDet2 = (double *) R_alloc(pFPDet, sizeof(double));
     double *tmp_pOcc2 = (double *) R_alloc(pOcc, sizeof(double));
     int *tmp_J = (int *) R_alloc(J, sizeof(int));
     for (j = 0; j < J; j++) {
@@ -284,22 +270,20 @@ extern "C" {
     double *tmp_nObs = (double *) R_alloc(nObs, sizeof(double)); 
     double *tmp_nObs2 = (double *) R_alloc(nObs, sizeof(double)); 
     double *tmp_JpOcc = (double *) R_alloc(JpOcc, sizeof(double));
-    double *tmp_nObspTPDet = (double *) R_alloc(nObspTPDet, sizeof(double));
-    double *tmp_nObspFPDet = (double *) R_alloc(nObspFPDet, sizeof(double));
     double *tmp_J1 = (double *) R_alloc(J, sizeof(double));
    
     // For latent occupancy and WAIC
-    double psiNum; 
+    double logitPsi, logLikeMax;
     double *mu = (double *) R_alloc(nObs, sizeof(double)); zeros(mu, nObs);
     double *omega = (double *) R_alloc(nObs, sizeof(double)); zeros(omega, nObs);
     double *yWAIC = (double *) R_alloc(J, sizeof(double)); zeros(yWAIC, J);
-    double *psi = (double *) R_alloc(J, sizeof(double)); 
-    zeros(psi, J); 
-    double *piProd = (double *) R_alloc(J, sizeof(double)); 
-    ones(piProd, J); 
-    double *piProdWAIC = (double *) R_alloc(J, sizeof(double)); 
-    ones(piProdWAIC, J); 
-    double *ySum = (double *) R_alloc(J, sizeof(double)); zeros(ySum, J);
+    double *psi = (double *) R_alloc(J, sizeof(double));
+    zeros(psi, J);
+    // Site-level log-likelihood of y and d when z = 1 and when z = 0
+    double *logLikeOcc = (double *) R_alloc(J, sizeof(double)); zeros(logLikeOcc, J);
+    double *logLikeUnocc = (double *) R_alloc(J, sizeof(double)); zeros(logLikeUnocc, J);
+    // Site-level number of validated true positives
+    double *dSum = (double *) R_alloc(J, sizeof(double)); zeros(dSum, J);
 
     // For normal priors
     // Occupancy regression coefficient priors. 
@@ -366,9 +350,8 @@ extern "C" {
     /**********************************************************************
      * Set up MH stuff
      *********************************************************************/
-    // TODO: note that for now, not including D in the tuning since it will 
-    //       be proposed from a distribution without a proposal variance and 
-    //       thus it won't be able to be tuned. 
+    // D is not tuned: it is collapsed out of the detection updates and drawn
+    // exactly from its full conditional as a derived quantity.
     double logPostGammaCurr = 0.0, logPostGammaCand = 0.0;
     double logPostDeltaCurr = 0.0, logPostDeltaCand = 0.0;
     double *logPostGammaStarCand = (double *) R_alloc(nTPDetRE, sizeof(double));
@@ -496,7 +479,7 @@ extern "C" {
               // mu + gamma
               tmp_nObs2[i] = tmp_nObs[i] + omega[i]; 
               logPostGammaCand += poisson_logpost(y[i], tmp_nObs2[i], 1.0);
-              logPostGammaCand += Rf_dbinom(D[i], y[i], tmp_nObs[i] / tmp_nObs2[i], 1);
+              logPostGammaCand += Rf_dbinom(d[i], nVal[i], tmp_nObs[i] / tmp_nObs2[i], 1);
 
 
               tmp_nObs[i] = exp(F77_NAME(ddot)(&pTPDet, &Xmu[i], &nObs, gamma, &inc) + 
@@ -504,7 +487,7 @@ extern "C" {
               // mu + gamma
               tmp_nObs2[i] = tmp_nObs[i] + omega[i]; 
               logPostGammaCurr += poisson_logpost(y[i], tmp_nObs2[i], 1.0);
-              logPostGammaCurr += Rf_dbinom(D[i], y[i], tmp_nObs[i] / tmp_nObs2[i], 1);
+              logPostGammaCurr += Rf_dbinom(d[i], nVal[i], tmp_nObs[i] / tmp_nObs2[i], 1);
             }
           }
           if (runif(0.0, 1.0) <= exp(logPostGammaCand - logPostGammaCurr)) {
@@ -537,12 +520,12 @@ extern "C" {
             tmp_nObs[i] = exp(F77_NAME(ddot)(&pFPDet, &Xomega[i], &nObs, deltaCand, &inc) + deltaStarObs[i]) + 
                           mu[i] * z[zLongIndx[i]];
             logPostDeltaCand += poisson_logpost(y[i], tmp_nObs[i], 1.0);
-            logPostDeltaCand += Rf_dbinom(D[i], y[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
+            logPostDeltaCand += Rf_dbinom(d[i], nVal[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
             
             tmp_nObs[i] = exp(F77_NAME(ddot)(&pFPDet, &Xomega[i], &nObs, delta, &inc) + deltaStarObs[i]) + 
                           mu[i] * z[zLongIndx[i]];
             logPostDeltaCurr += poisson_logpost(y[i], tmp_nObs[i], 1.0);
-            logPostDeltaCurr += Rf_dbinom(D[i], y[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
+            logPostDeltaCurr += Rf_dbinom(d[i], nVal[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
 
           }
           if (runif(0.0, 1.0) <= exp(logPostDeltaCand - logPostDeltaCurr)) {
@@ -648,11 +631,11 @@ extern "C" {
                 tmp_nObs[i] = mu[i] * exp(gammaStarCand[l] - gammaStar[l]);
                 tmp_nObs2[i] = tmp_nObs[i] + omega[i];
                 logPostGammaStarCand[l] += poisson_logpost(y[i], tmp_nObs2[i], 1.0);
-                logPostGammaStarCand[l] += Rf_dbinom(D[i], y[i], tmp_nObs[i] / tmp_nObs2[i], 1);
+                logPostGammaStarCand[l] += Rf_dbinom(d[i], nVal[i], tmp_nObs[i] / tmp_nObs2[i], 1);
 
                 tmp_nObs2[i] = mu[i] + omega[i];
                 logPostGammaStarCurr[l] += poisson_logpost(y[i], tmp_nObs2[i], 1.0);
-                logPostGammaStarCurr[l] += Rf_dbinom(D[i], y[i], mu[i] / tmp_nObs2[i], 1);
+                logPostGammaStarCurr[l] += Rf_dbinom(d[i], nVal[i], mu[i] / tmp_nObs2[i], 1);
               }
             }
             if (runif(0.0, 1.0) <= exp(logPostGammaStarCand[l] - logPostGammaStarCurr[l])) {
@@ -669,6 +652,34 @@ extern "C" {
               accept[gammaStarAMCMCIndx + l]++;
             } else {
               gammaStarCand[l] = gammaStar[l];
+            }
+          }
+        }
+
+        /********************************************************************
+         *Joint shift of TP intercept and TP random effects
+         *******************************************************************/
+        // gamma[0] + c and gammaStar - c (for all levels of one RE factor)
+        // leaves every mu[i] unchanged, so the likelihood cancels and c is
+        // drawn exactly from its Gaussian conditional given the priors
+        // (generalized Gibbs move; Liu and Sabatti 2000).
+        if (pTPDetRE > 0 && tpDetInt) {
+          for (ll = 0; ll < pTPDetRE; ll++) {
+            tmp_0 = 0.0;
+            for (l = gammaStarStart[ll]; l < gammaStarStart[ll] + nTPDetRELong[ll]; l++) {
+              tmp_0 += gammaStar[l];
+            }
+            tmp_02 = 1.0 / (1.0 / SigmaGamma[0] + nTPDetRELong[ll] / sigmaSqMu[ll]);
+            tmp_02 = rnorm(tmp_02 * ((muGamma[0] - gamma[0]) / SigmaGamma[0] +
+                                     tmp_0 / sigmaSqMu[ll]), sqrt(tmp_02));
+            gamma[0] += tmp_02;
+            gammaCand[0] = gamma[0];
+            for (l = gammaStarStart[ll]; l < gammaStarStart[ll] + nTPDetRELong[ll]; l++) {
+              gammaStar[l] -= tmp_02;
+              gammaStarCand[l] = gammaStar[l];
+            }
+            for (i = 0; i < nObs; i++) {
+              gammaStarObs[i] -= tmp_02;
             }
           }
         }
@@ -696,11 +707,11 @@ extern "C" {
                 tmp_nObs[i] = omega[i] * exp(deltaStarCand[l] - deltaStar[l]) +
                               mu[i] * z[zLongIndx[i]];
                 logPostDeltaStarCand[l] += poisson_logpost(y[i], tmp_nObs[i], 1.0);
-                logPostDeltaStarCand[l] += Rf_dbinom(D[i], y[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
+                logPostDeltaStarCand[l] += Rf_dbinom(d[i], nVal[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
 
                 tmp_nObs[i] = omega[i] + mu[i] * z[zLongIndx[i]];
                 logPostDeltaStarCurr[l] += poisson_logpost(y[i], tmp_nObs[i], 1.0);
-                logPostDeltaStarCurr[l] += Rf_dbinom(D[i], y[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
+                logPostDeltaStarCurr[l] += Rf_dbinom(d[i], nVal[i], mu[i] * z[zLongIndx[i]] / tmp_nObs[i], 1);
               }
             }
             if (runif(0.0, 1.0) <= exp(logPostDeltaStarCand[l] - logPostDeltaStarCurr[l])) {
@@ -722,54 +733,74 @@ extern "C" {
         }
 
         /********************************************************************
-         *Update Latent True Positive Detections
+         *Joint shift of FP intercept and FP random effects
          *******************************************************************/
-         // TODO: 
+        // Same move as for the TP random effects: omega[i] is unchanged.
+        if (pFPDetRE > 0 && fpDetInt) {
+          for (ll = 0; ll < pFPDetRE; ll++) {
+            tmp_0 = 0.0;
+            for (l = deltaStarStart[ll]; l < deltaStarStart[ll] + nFPDetRELong[ll]; l++) {
+              tmp_0 += deltaStar[l];
+            }
+            tmp_02 = 1.0 / (1.0 / SigmaDelta[0] + nFPDetRELong[ll] / sigmaSqOmega[ll]);
+            tmp_02 = rnorm(tmp_02 * ((muDelta[0] - delta[0]) / SigmaDelta[0] +
+                                     tmp_0 / sigmaSqOmega[ll]), sqrt(tmp_02));
+            delta[0] += tmp_02;
+            deltaCand[0] = delta[0];
+            for (l = deltaStarStart[ll]; l < deltaStarStart[ll] + nFPDetRELong[ll]; l++) {
+              deltaStar[l] -= tmp_02;
+              deltaStarCand[l] = deltaStar[l];
+            }
+            for (i = 0; i < nObs; i++) {
+              deltaStarObs[i] -= tmp_02;
+            }
+          }
+        }
 
         /********************************************************************
          *Update Latent Occupancy
          *******************************************************************/
-        // TODO: needs updating. This is code from PGOcc.cpp that will not be completely applicable 
-        //       here with the addition of false positives. 
-        // Compute detection probability 
-        // if (nObs == J) {
-        //   for (i = 0; i < nObs; i++) {
-        //     detProb[i] = logitInv(F77_NAME(ddot)(&pDet, &Xp[i], &nObs, alpha, &inc) + alphaStarObs[i], zero, one);
-        //     psi[zLongIndx[i]] = logitInv(F77_NAME(ddot)(&pOcc, &X[zLongIndx[i]], &J, beta, &inc) + betaStarSites[zLongIndx[i]], zero, one); 
-        //     piProd[zLongIndx[i]] = pow(1.0 - detProb[i], K[i]);
-        //     piProdWAIC[zLongIndx[i]] *= pow(detProb[i], y[i]);
-        //     piProdWAIC[zLongIndx[i]] *= pow(1.0 - detProb[i], K[i] - y[i]);
-        //     ySum[zLongIndx[i]] = y[i]; 	
-        //   } // i
-        // } else {
-        //   for (i = 0; i < nObs; i++) {
-        //     detProb[i] = logitInv(F77_NAME(ddot)(&pDet, &Xp[i], &nObs, alpha, &inc) + alphaStarObs[i], zero, one);
-        //     if (tmp_J[zLongIndx[i]] == 0) {
-        //       psi[zLongIndx[i]] = logitInv(F77_NAME(ddot)(&pOcc, &X[zLongIndx[i]], &J, beta, &inc) + betaStarSites[zLongIndx[i]], zero, one); 
-        //     }
-        //     piProd[zLongIndx[i]] *= (1.0 - detProb[i]);
-        //     piProdWAIC[zLongIndx[i]] *= pow(detProb[i], y[i]);
-        //     piProdWAIC[zLongIndx[i]] *= pow(1.0 - detProb[i], 1 - y[i]);
-        //     ySum[zLongIndx[i]] += y[i]; 	
-        //     tmp_J[zLongIndx[i]]++;
-        //   } // i
-        // }
+        // Accumulate the site-level log-likelihood of (y, d) under each value
+        // of z. When z = 1: y ~ Poisson(mu + omega), d ~ Bin(n, mu / (mu + omega)).
+        // When z = 0: y ~ Poisson(omega), and d must be 0 (Bin(d; n, 0)).
+        // Visits with y = 0 are included, as they are evidence for absence.
+        for (j = 0; j < J; j++) {
+          logLikeOcc[j] = 0.0;
+          logLikeUnocc[j] = 0.0;
+          dSum[j] = 0.0;
+        } // j
+        for (i = 0; i < nObs; i++) {
+          tmp_0 = mu[i] + omega[i];
+          logLikeOcc[zLongIndx[i]] += poisson_logpost(y[i], tmp_0, 1.0) +
+                                      Rf_dbinom(d[i], nVal[i], mu[i] / tmp_0, 1);
+          logLikeUnocc[zLongIndx[i]] += poisson_logpost(y[i], omega[i], 1.0);
+          dSum[zLongIndx[i]] += d[i];
+        } // i
 
-        // // Compute occupancy probability and the integrated likelihood for WAIC
-        // for (j = 0; j < J; j++) {
-        //   psiNum = psi[j] * piProd[j]; 
-        //   if (ySum[j] == zero) {
-        //     z[j] = rbinom(one, psiNum / (psiNum + (1.0 - psi[j])));          
-        //     yWAIC[j] = (1.0 - psi[j]) + psi[j] * piProdWAIC[j]; 
-        //   } else {
-        //     z[j] = one; 
-        //     yWAIC[j] = psi[j] * piProdWAIC[j];
-        //   }
-        //   piProd[j] = one;
-        //   piProdWAIC[j] = one;
-        //   ySum[j] = zero; 
-        //   tmp_J[j] = 0; 
-        // } // j
+        // Sample z and compute the z-marginalized likelihood for WAIC
+        for (j = 0; j < J; j++) {
+          logitPsi = F77_NAME(ddot)(&pOcc, &X[j], &J, beta, &inc) + betaStarSites[j];
+          psi[j] = logitInv(logitPsi, zero, one);
+          if (dSum[j] > 0.0) {
+            // A validated true positive means the site is occupied.
+            z[j] = one;
+            yWAIC[j] = psi[j] * exp(logLikeOcc[j]);
+          } else {
+            // P(z = 1 | .) = psi L1 / (psi L1 + (1 - psi) L0), which on the
+            // log scale is logitInv(logit(psi) + log L1 - log L0). Working
+            // with the difference avoids underflow of L1 and L0.
+            // L1 is the likelihood if site j is occupied. L0 is the likelihood
+            // if site j is unoccupied. 
+            z[j] = rbinom(one, logitInv(logitPsi + logLikeOcc[j] - logLikeUnocc[j],
+                                        zero, one));
+            // log(psi L1 + (1 - psi) L0) via log-sum-exp
+            tmp_0 = log(psi[j]) + logLikeOcc[j];
+            tmp_02 = log(1.0 - psi[j]) + logLikeUnocc[j];
+            logLikeMax = std::max(tmp_0, tmp_02);
+            yWAIC[j] = exp(logLikeMax + log(exp(tmp_0 - logLikeMax) +
+                                            exp(tmp_02 - logLikeMax)));
+          }
+        } // j
 
         /********************************************************************
          *Save samples
@@ -782,7 +813,6 @@ extern "C" {
             F77_NAME(dcopy)(&pFPDet, delta, &inc, &REAL(deltaSamples_r)[sPost*pFPDet], &inc);
             F77_NAME(dcopy)(&J, psi, &inc, &REAL(psiSamples_r)[sPost*J], &inc); 
             F77_NAME(dcopy)(&J, z, &inc, &REAL(zSamples_r)[sPost*J], &inc); 
-            F77_NAME(dcopy)(&nObs, D, &inc, &REAL(DSamples_r)[sPost*nObs], &inc); 
             if (pOccRE > 0) {
               F77_NAME(dcopy)(&pOccRE, sigmaSqPsi, &inc, 
           		    &REAL(sigmaSqPsiSamples_r)[sPost*pOccRE], &inc);
@@ -853,7 +883,7 @@ extern "C" {
     PutRNGstate();
 
     SEXP result_r, resultName_r;
-    int nResultListObjs = 13;
+    int nResultListObjs = 12;
 
     PROTECT(result_r = Rf_allocVector(VECSXP, nResultListObjs)); nProtect++;
     PROTECT(resultName_r = Rf_allocVector(VECSXP, nResultListObjs)); nProtect++;
@@ -863,40 +893,38 @@ extern "C" {
     SET_VECTOR_ELT(result_r, 1, gammaSamples_r);
     SET_VECTOR_ELT(result_r, 2, deltaSamples_r);
     SET_VECTOR_ELT(result_r, 3, zSamples_r); 
-    SET_VECTOR_ELT(result_r, 4, DSamples_r);
-    SET_VECTOR_ELT(result_r, 5, psiSamples_r);
-    SET_VECTOR_ELT(result_r, 6, likeSamples_r);
+    SET_VECTOR_ELT(result_r, 4, psiSamples_r);
+    SET_VECTOR_ELT(result_r, 5, likeSamples_r);
     if (pTPDetRE > 0) {
-      SET_VECTOR_ELT(result_r, 7, sigmaSqMuSamples_r);
-      SET_VECTOR_ELT(result_r, 8, gammaStarSamples_r);
+      SET_VECTOR_ELT(result_r, 6, sigmaSqMuSamples_r);
+      SET_VECTOR_ELT(result_r, 7, gammaStarSamples_r);
     }
     if (pOccRE > 0) {
-      SET_VECTOR_ELT(result_r, 9, sigmaSqPsiSamples_r);
-      SET_VECTOR_ELT(result_r, 10, betaStarSamples_r);
+      SET_VECTOR_ELT(result_r, 8, sigmaSqPsiSamples_r);
+      SET_VECTOR_ELT(result_r, 9, betaStarSamples_r);
     }
     if (pFPDetRE > 0) {
-      SET_VECTOR_ELT(result_r, 11, sigmaSqOmegaSamples_r);
-      SET_VECTOR_ELT(result_r, 12, deltaStarSamples_r);
+      SET_VECTOR_ELT(result_r, 10, sigmaSqOmegaSamples_r);
+      SET_VECTOR_ELT(result_r, 11, deltaStarSamples_r);
     }
 
     SET_VECTOR_ELT(resultName_r, 0, Rf_mkChar("beta.samples")); 
     SET_VECTOR_ELT(resultName_r, 1, Rf_mkChar("gamma.samples")); 
     SET_VECTOR_ELT(resultName_r, 2, Rf_mkChar("delta.samples")); 
     SET_VECTOR_ELT(resultName_r, 3, Rf_mkChar("z.samples")); 
-    SET_VECTOR_ELT(resultName_r, 4, Rf_mkChar("D.samples")); 
-    SET_VECTOR_ELT(resultName_r, 5, Rf_mkChar("psi.samples"));
-    SET_VECTOR_ELT(resultName_r, 6, Rf_mkChar("like.samples"));
+    SET_VECTOR_ELT(resultName_r, 4, Rf_mkChar("psi.samples"));
+    SET_VECTOR_ELT(resultName_r, 5, Rf_mkChar("like.samples"));
     if (pTPDetRE > 0) {
-      SET_VECTOR_ELT(resultName_r, 7, Rf_mkChar("sigma.sq.mu.samples")); 
-      SET_VECTOR_ELT(resultName_r, 8, Rf_mkChar("gamma.star.samples")); 
+      SET_VECTOR_ELT(resultName_r, 6, Rf_mkChar("sigma.sq.mu.samples")); 
+      SET_VECTOR_ELT(resultName_r, 7, Rf_mkChar("gamma.star.samples")); 
     }
     if (pOccRE > 0) {
-      SET_VECTOR_ELT(resultName_r, 9, Rf_mkChar("sigma.sq.psi.samples")); 
-      SET_VECTOR_ELT(resultName_r, 10, Rf_mkChar("beta.star.samples")); 
+      SET_VECTOR_ELT(resultName_r, 8, Rf_mkChar("sigma.sq.psi.samples")); 
+      SET_VECTOR_ELT(resultName_r, 9, Rf_mkChar("beta.star.samples")); 
     }
     if (pFPDetRE > 0) {
-      SET_VECTOR_ELT(resultName_r, 11, Rf_mkChar("sigma.sq.omega.samples")); 
-      SET_VECTOR_ELT(resultName_r, 12, Rf_mkChar("delta.star.samples")); 
+      SET_VECTOR_ELT(resultName_r, 10, Rf_mkChar("sigma.sq.omega.samples")); 
+      SET_VECTOR_ELT(resultName_r, 11, Rf_mkChar("delta.star.samples")); 
     }
    
     Rf_namesgets(result_r, resultName_r);
