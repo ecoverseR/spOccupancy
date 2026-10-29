@@ -16,7 +16,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1)
@@ -746,7 +746,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1, 0.5, -0.4)
@@ -2194,7 +2194,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10),
                sigma.sq.psi = c(0.8))
@@ -2556,7 +2556,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10, 15),
                sigma.sq.psi = c(0.8, 0.3))
@@ -3647,7 +3647,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1)
@@ -4008,7 +4008,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1)
@@ -4371,7 +4371,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1, 0.5)
@@ -5100,7 +5100,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10),
                sigma.sq.psi = c(0.8))

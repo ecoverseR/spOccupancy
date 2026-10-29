@@ -16,7 +16,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 svc.cols <- 1
 psi.RE <- list()
@@ -27,8 +27,8 @@ phi <- rep(3 / .7, length(svc.cols))
 sigma.sq <- rep(2, length(svc.cols))
 nu <- rep(2, length(svc.cols))
 dat <- simTOcc(J.x = J.x, J.y = J.y, n.time = n.time, n.rep = n.rep,
-	       beta = beta, alpha = alpha, sp.only = sp.only, trend = trend,
-	       psi.RE = psi.RE, p.RE = p.RE, sp = TRUE, sigma.sq = sigma.sq, 
+               beta = beta, alpha = alpha, sp.only = sp.only, trend = trend,
+               psi.RE = psi.RE, p.RE = p.RE, sp = TRUE, sigma.sq = sigma.sq, 
                phi = phi, cov.model = 'matern', nu = nu, svc.cols = svc.cols)
 
 # Subset data for prediction
@@ -762,7 +762,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1, 0.5, -0.4)
@@ -2245,7 +2245,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE
 sp.only <- 0
 psi.RE <- list(levels = c(10),
                sigma.sq.psi = c(0.8))
@@ -2616,7 +2616,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10, 15),
                sigma.sq.psi = c(0.8, 0.3))
@@ -3737,7 +3737,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1)
@@ -4107,7 +4107,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1)
@@ -4479,7 +4479,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1, 0.5)
@@ -4853,7 +4853,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4, 0.5)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list()
 alpha <- c(-1, 0.5)
@@ -5229,7 +5229,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10),
                sigma.sq.psi = c(0.8))
@@ -5601,7 +5601,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4, 0.8)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10),
                sigma.sq.psi = c(0.8))
