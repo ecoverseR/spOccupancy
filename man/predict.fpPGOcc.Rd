@@ -104,7 +104,6 @@ data.list <- list(y = y,
                   occ.covs = occ.covs,
                   tp.det.covs = tp.det.covs,
                   fp.det.covs = fp.det.covs,
-                  coords = dat$coords,
                   n.val = n.val,
                   d = d)
 

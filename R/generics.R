@@ -403,7 +403,7 @@ summary.ppcOcc <- function(object, level = 'both',
     cat("Fit statistic: ", object$fit.stat, "\n")
   }
 
-  if (object$class %in% c('fpPGOcc')) {
+  if (object$class %in% c('fpPGOcc', 'spFpPGOcc')) {
     cat("----------------------------------------\n");
     cat("\tDetection data (y)\n");
     cat("----------------------------------------\n");
@@ -572,8 +572,8 @@ predict.spPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
     stop("predict expects object\n")
   }
   #if (!is(object, c('spPGOcc', 'spIntPGOcc'))) {
-  if (!(class(object) %in% c('spPGOcc', 'spIntPGOcc'))) {
-    stop("requires an output object of class spPGOcc or spIntPGOcc\n")
+  if (!(class(object) %in% c('spPGOcc', 'spIntPGOcc', 'spFpPGOcc'))) {
+    stop("requires an output object of class spPGOcc, spIntPGOcc, or spFpPGOcc\n")
   }
 
   if (!(tolower(type) %in% c('occupancy', 'detection'))) {
@@ -5839,8 +5839,8 @@ residuals.fpPGOcc <- function(object, n.post.samples = 100, type = 'quantile', .
   if (missing(object)) {
     stop("object must be specified")
   }
-  if (!(class(object) %in% c('fpPGOcc'))) {
-    stop('object must be of class fpPGOcc')
+  if (!(class(object) %in% c('fpPGOcc', 'spFpPGOcc'))) {
+    stop('object must be of class fpPGOcc or spFpPGOcc')
   }
   if (!(type %in% c('quantile', 'pearson', 'response'))) {
     stop("type must be one of 'quantile', 'pearson', or 'response'")
@@ -6033,5 +6033,75 @@ predict.fpPGOcc <- function(object, X.0, ignore.RE = FALSE,
   out$call <- cl
 
   class(out) <- "predict.fpPGOcc"
+  out
+}
+
+# spFpPGOcc ---------------------------------------------------------------
+print.spFpPGOcc <- function(x, ...) {
+  cat("\nCall:", deparse(x$call, width.cutoff = floor(getOption("width") * 0.75)),
+      "", sep = "\n")
+}
+
+summary.spFpPGOcc <- function(object,
+                              quantiles = c(0.025, 0.5, 0.975),
+                              digits = max(3L, getOption("digits") - 3L), ...) {
+  # Occurrence, true positive, and false positive parameters
+  summary.fpPGOcc(object, quantiles = quantiles, digits = digits)
+  cat("\n")
+  # Covariance ------------------------
+  cat("Spatial Covariance: \n")
+  tmp.1 <- t(apply(object$theta.samples, 2,
+                   function(x) c(mean(x), sd(x))))
+  colnames(tmp.1) <- c("Mean", "SD")
+  tmp <- t(apply(object$theta.samples, 2,
+                 function(x) quantile(x, prob = quantiles)))
+  diags <- matrix(c(object$rhat$theta, round(object$ESS$theta, 0)), ncol = 2)
+  colnames(diags) <- c('Rhat', 'ESS')
+  print(noquote(round(cbind(tmp.1, tmp, diags), digits)))
+}
+
+fitted.spFpPGOcc <- function(object, ...) {
+  fitted.fpPGOcc(object)
+}
+
+residuals.spFpPGOcc <- function(object, n.post.samples = 100, type = 'quantile', ...) {
+  residuals.fpPGOcc(object, n.post.samples, type)
+}
+
+predict.spFpPGOcc <- function(object, X.0, coords.0, n.omp.threads = 1,
+                              verbose = TRUE, n.report = 100,
+                              ignore.RE = FALSE, type = 'occupancy',
+                              grid.index.0, ...) {
+  # Check for unused arguments ------------------------------------------
+  formal.args <- names(formals(sys.function(sys.parent())))
+  elip.args <- names(list(...))
+  for(i in elip.args){
+      if(! i %in% formal.args)
+          warning("'",i, "' is not an argument")
+  }
+  # Call ----------------------------------------------------------------
+  cl <- match.call()
+
+  if (missing(object)) {
+    stop("predict expects object\n")
+  }
+  type <- tolower(type)
+  if (!(type %in% c('occupancy', 'true positive', 'false positive'))) {
+    stop("prediction type must be one of 'occupancy', 'true positive', or 'false positive'")
+  }
+  # Occurrence predictions: the occupancy sub-model is the same as spPGOcc
+  if (type == 'occupancy') {
+    out <- predict.spPGOcc(object, X.0, coords.0, n.omp.threads = n.omp.threads,
+                           verbose = verbose, n.report = n.report,
+                           ignore.RE = ignore.RE, type = 'occupancy',
+                           grid.index.0 = grid.index.0)
+  }
+  # True positive and false positive rate predictions (non-spatial)
+  if (type %in% c('true positive', 'false positive')) {
+    out <- predict.fpPGOcc(object, X.0, ignore.RE = ignore.RE, type = type)
+  }
+  out$call <- cl
+  out$object.class <- class(object)
+  class(out) <- "predict.spFpPGOcc"
   out
 }

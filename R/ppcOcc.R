@@ -23,8 +23,9 @@ ppcOcc <- function(object, fit.stat, group, ...) {
                              'lfMsPGOcc', 'sfMsPGOcc', 'tPGOcc', 'stPGOcc', 
                              'svcPGOcc', 'svcTPGOcc', 'tMsPGOcc', 'svcMsPGOcc', 
                              'svcTMsPGOcc', 'stMsPGOcc', 'tIntPGOcc', 
-                             'stIntPGOcc', 'svcTIntPGOcc', 'fpPGOcc'))) {
-    stop("object must be one of the following classes: PGOcc, spPGOcc, msPGOcc, spMsPGOcc, intPGOcc, spIntPGOcc, lfMsPGOcc, sfMsPGOcc, tPGOcc, stPGOcc, svcPGOcc, svcTPGOcc, tMsPGOcc, svcMsPGOcc, svcTMsPGOcc, stMsPGOcc, tIntPGOcc, stIntPGOcc, svcTIntPGOcc, fpPGOcc\n")
+                             'stIntPGOcc', 'svcTIntPGOcc', 'fpPGOcc',
+                             'spFpPGOcc'))) {
+    stop("object must be one of the following classes: PGOcc, spPGOcc, msPGOcc, spMsPGOcc, intPGOcc, spIntPGOcc, lfMsPGOcc, sfMsPGOcc, tPGOcc, stPGOcc, svcPGOcc, svcTPGOcc, tMsPGOcc, svcMsPGOcc, svcTMsPGOcc, stMsPGOcc, tIntPGOcc, stIntPGOcc, svcTIntPGOcc, fpPGOcc, spFpPGOcc\n")
   }
   # Fit statistic ---------------------
   if (missing(fit.stat)) {
@@ -38,7 +39,7 @@ ppcOcc <- function(object, fit.stat, group, ...) {
   if (missing(group)) {
     stop("group must be specified")
   }
-  if (class(object) %in% c('fpPGOcc')) {
+  if (class(object) %in% c('fpPGOcc', 'spFpPGOcc')) {
     # Count data can be checked without binning, so allow cell-level checks.
     if (!(group %in% c(0, 1, 2))) {
       stop("group must be 0 (site/replicate cells), 1 (sites), or 2 (replicates)")
@@ -588,7 +589,7 @@ ppcOcc <- function(object, fit.stat, group, ...) {
   }
 
   # False positive models -------------------------------------------------
-  if (class(object) %in% c('fpPGOcc')) {
+  if (class(object) %in% c('fpPGOcc', 'spFpPGOcc')) {
     out <- ppcFPOcc(object, fit.stat, group)
     out$group <- group
     out$fit.stat <- fit.stat
@@ -629,7 +630,7 @@ ppcFitStat <- function(obs, rep, E, grp, fit.stat, e = 0.0001) {
        fit.big.y = fit.big.y, fit.big.y.rep = fit.big.y.rep)
 }
 
-# Internal: posterior predictive checks for fpPGOcc. Separate checks are done
+# Internal: posterior predictive checks for fpPGOcc and spFpPGOcc. Separate checks are done
 # for the detection counts y ~ Poisson(z * mu + omega) and the validation data
 # d ~ Binomial(n.val, z * mu / (z * mu + omega)). Both condition on the
 # posterior draws of z, and the d check conditions on the observed n.val.

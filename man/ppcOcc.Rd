@@ -15,7 +15,7 @@ ppcOcc(object, fit.stat, group, ...)
 \code{spMsPGOcc}, \code{intPGOcc}, \code{spIntPGOcc}, \code{lfMsPGOcc}, \code{sfMsPGOcc}, 
 \code{tPGOcc}, \code{stPGOcc}, \code{svcPGOcc}, \code{svcMsPGOcc}, \code{tMsPGOcc}, 
 \code{stMsPGOcc}, \code{svcTMsPGOcc}, \code{tIntPGOcc}, \code{stIntPGOcc}, 
-\code{svcTIntPGOcc}, \code{fpPGOcc}.}
+\code{svcTIntPGOcc}, \code{fpPGOcc}, \code{spFpPGOcc}.}
 
 \item{fit.stat}{a quoted keyword that specifies the fit statistic
 to use in the posterior predictive check. Supported fit statistics are
@@ -35,7 +35,7 @@ the check on the individual site/replicate counts without grouping.}
   predictive checks must be performed on some sort of binned data. This is
   what is done for all occupancy models that input binary data.
 
-  For \code{fpPGOcc} objects, two separate checks are performed: one for 
+  For false positive model objects, two separate checks are performed: one for 
   the detection counts \eqn{y}, with expected value \eqn{z\mu + \omega}, and 
   one for the validation data \eqn{d}, with expected value 
   \eqn{n \cdot z\mu / (z\mu + \omega)}, where \eqn{n} is the observed number of 
@@ -110,7 +110,7 @@ the check on the individual site/replicate counts without grouping.}
   is of class \code{tMsPGOcc}, \code{stMsPGOcc}, \code{svcTMsPGOcc}, this is a four-dimensional array
   with dimensions corresponding to quantile, species, grouping element, and primary time period.}
 
-  When \code{object} is of class \code{fpPGOcc}, \code{fit.y}, \code{fit.y.rep}, 
+  When \code{object} is a model fit from a false positive model, \code{fit.y}, \code{fit.y.rep}, 
   \code{fit.y.group.quants}, and \code{fit.y.rep.group.quants} correspond to 
   the detection count data \eqn{y}. When \code{group = 0}, the group quantiles
   are three-dimensional arrays with dimensions corresponding to quantile, site, 

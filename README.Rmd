@@ -59,6 +59,8 @@ install.packages("spOccupancy")
 | `tIntPGOcc()`          | Multi-season occupancy model with multiple data sources                  |
 | `stIntPGOcc()`         | Spatial multi-season occupancy model with multiple data sources          |
 | `svcTIntPGOcc()`       | SVC multi-season occupancy model with multiple data sources              |
+| `fpPGOcc()`            | Single-species false-positive occupancy model                            |
+| `spFpPGOcc()`          | Single-species spatial false-positive occupancy model                    |
 | `postHocLM()`          | Fit a linear (mixed) model using estimates from a previous model fit     |
 | `ppcOcc()`             | Posterior predictive check using Bayesian p-values                       |
 | `waicOcc()`            | Compute Widely Applicable Information Criterion (WAIC)                   |
@@ -72,6 +74,7 @@ install.packages("spOccupancy")
 | `simIntOcc()`          | Simulate single-species occupancy data from multiple data sources        |
 | `simIntMsOcc()`        | Simulate multi-species occupancy data from multiple data sources         |
 | `simTIntOcc()`         | Simulate multi-season occupancy data from multiple data sources          |
+| `simFpPGOcc()`         | Simulate single-species occupancy data with false positives              |
 
 ## Example usage
 

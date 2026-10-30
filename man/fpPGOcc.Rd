@@ -10,7 +10,7 @@ fpPGOcc(occ.formula, tp.det.formula, fp.det.formula, data, inits, priors, tuning
 }
 
 \description{
-  Function for fitting single-species occupancy models using Polya-Gamma latent variables. 
+  Function for fitting single-species false positive occupancy models using Polya-Gamma latent variables. 
   The function assumes data arise from some automated algorithm that processed remote sensing
   data (e.g., acoustic recording units, camera traps) to generate a number of observations 
   for each site x replicate combination (i.e., count data). A human observer is assumed to 
@@ -274,7 +274,6 @@ data.list <- list(y = y,
                   occ.covs = occ.covs,
                   tp.det.covs = tp.det.covs,
                   fp.det.covs = fp.det.covs,
-                  coords = dat$coords,
                   n.val = n.val,
                   d = d)
 

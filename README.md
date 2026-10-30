@@ -6,7 +6,7 @@
 [![](http://cranlogs.r-pkg.org/badges/grand-total/spOccupancy?color=blue)](https://CRAN.R-project.org/package=spOccupancy)
 [![CRAN](https://www.r-pkg.org/badges/version/spOccupancy)](https://CRAN.R-project.org/package=spOccupancy)
 [![Codecov test
-coverage](https://codecov.io/gh/biodiverse/spOccupancy/branch/main/graph/badge.svg)](https://app.codecov.io/gh/biodiverse/spOccupancy?branch=main)
+coverage](https://codecov.io/gh/biodiverse/spOccupancy/branch/main/graph/badge.svg)](https://codecov.io/gh/biodiverse/spOccupancy?branch=main)
 
 spOccupancy fits single-species, multi-species, and integrated spatial
 occupancy models using Markov chain Monte Carlo (MCMC). Models are fit
@@ -34,45 +34,48 @@ install.packages("spOccupancy")
 
 ## Functionality
 
-| `spOccupancy` Function | Description                                                               |
-|------------------------|---------------------------------------------------------------------------|
-| `PGOcc()`              | Single-species occupancy model                                            |
-| `spPGOcc()`            | Single-species spatial occupancy model                                    |
-| `intPGOcc()`           | Single-species occupancy model with multiple data sources                 |
-| `spIntPGOcc()`         | Single-species spatial occupancy model with multiple data sources         |
-| `msPGOcc()`            | Multi-species occupancy model                                             |
-| `spMsPGOcc()`          | Multi-species spatial occupancy model                                     |
-| `lfJSDM()`             | Joint species distribution model without imperfect detection              |
-| `sfJSDM()`             | Spatial joint species distribution model without imperfect detection      |
-| `lfMsPGOcc()`          | Multi-species occupancy model with species correlations                   |
-| `sfMsPGOcc()`          | Multi-species spatial occupancy model with species correlations           |
-| `intMsPGOcc()`         | Multi-species occupancy model with multiple data sources                  |
-| `tPGOcc()`             | Single-species multi-season occupancy model                               |
-| `stPGOcc()`            | Single-species multi-season spatio-temporal occupancy model               |
-| `svcPGBinom()`         | Single-species spatially-varying coefficient GLM                          |
-| `svcPGOcc()`           | Single-species spatially-varying coefficient occupancy model              |
-| `svcTPGBinom()`        | Single-species spatially-varying coefficient multi-season GLM             |
-| `svcTPGOcc()`          | Single-species spatially-varying coefficient multi-season occupancy model |
-| `svcMsPGOcc()`         | Multi-species spatially-varying coefficient occupancy model               |
-| `tMsPGOcc()`           | Multi-species, multi-season occupancy model                               |
-| `stMsPGOcc()`          | Multi-species, multi-season spatial occupancy model                       |
-| `svcTMsPGOcc()`        | Multi-species, multi-season spatially-varying coefficient occupancy model |
-| `tIntPGOcc()`          | Multi-season occupancy model with multiple data sources                   |
-| `stIntPGOcc()`         | Spatial multi-season occupancy model with multiple data sources           |
-| `svcTIntPGOcc()`       | SVC multi-season occupancy model with multiple data sources               |
-| `postHocLM()`          | Fit a linear (mixed) model using estimates from a previous model fit      |
-| `ppcOcc()`             | Posterior predictive check using Bayesian p-values                        |
-| `waicOcc()`            | Compute Widely Applicable Information Criterion (WAIC)                    |
-| `updateMCMC()`         | Update an existing model object with more MCMC samples (in development)   |
-| `simOcc()`             | Simulate single-species occupancy data                                    |
-| `simTOcc()`            | Simulate single-species multi-season occupancy data                       |
-| `simBinom()`           | Simulate detection-nondetection data with perfect detection               |
-| `simTBinom()`          | Simulate multi-season detection-nondetection data with perfect detection  |
-| `simMsOcc()`           | Simulate multi-species occupancy data                                     |
-| `simTMsOcc()`          | Simulate multi-species, multi-season occupancy data                       |
-| `simIntOcc()`          | Simulate single-species occupancy data from multiple data sources         |
-| `simIntMsOcc()`        | Simulate multi-species occupancy data from multiple data sources          |
-| `simTIntOcc()`         | Simulate multi-season occupancy data from multiple data sources           |
+| `spOccupancy` Function | Description |
+|----|----|
+| `PGOcc()` | Single-species occupancy model |
+| `spPGOcc()` | Single-species spatial occupancy model |
+| `intPGOcc()` | Single-species occupancy model with multiple data sources |
+| `spIntPGOcc()` | Single-species spatial occupancy model with multiple data sources |
+| `msPGOcc()` | Multi-species occupancy model |
+| `spMsPGOcc()` | Multi-species spatial occupancy model |
+| `lfJSDM()` | Joint species distribution model without imperfect detection |
+| `sfJSDM()` | Spatial joint species distribution model without imperfect detection |
+| `lfMsPGOcc()` | Multi-species occupancy model with species correlations |
+| `sfMsPGOcc()` | Multi-species spatial occupancy model with species correlations |
+| `intMsPGOcc()` | Multi-species occupancy model with multiple data sources |
+| `tPGOcc()` | Single-species multi-season occupancy model |
+| `stPGOcc()` | Single-species multi-season spatio-temporal occupancy model |
+| `svcPGBinom()` | Single-species spatially-varying coefficient GLM |
+| `svcPGOcc()` | Single-species spatially-varying coefficient occupancy model |
+| `svcTPGBinom()` | Single-species spatially-varying coefficient multi-season GLM |
+| `svcTPGOcc()` | Single-species spatially-varying coefficient multi-season occupancy model |
+| `svcMsPGOcc()` | Multi-species spatially-varying coefficient occupancy model |
+| `tMsPGOcc()` | Multi-species, multi-season occupancy model |
+| `stMsPGOcc()` | Multi-species, multi-season spatial occupancy model |
+| `svcTMsPGOcc()` | Multi-species, multi-season spatially-varying coefficient occupancy model |
+| `tIntPGOcc()` | Multi-season occupancy model with multiple data sources |
+| `stIntPGOcc()` | Spatial multi-season occupancy model with multiple data sources |
+| `svcTIntPGOcc()` | SVC multi-season occupancy model with multiple data sources |
+| `fpPGOcc()` | Single-species false-positive occupancy model |
+| `spFpPGOcc()` | Single-species spatial false-positive occupancy model |
+| `postHocLM()` | Fit a linear (mixed) model using estimates from a previous model fit |
+| `ppcOcc()` | Posterior predictive check using Bayesian p-values |
+| `waicOcc()` | Compute Widely Applicable Information Criterion (WAIC) |
+| `updateMCMC()` | Update an existing model object with more MCMC samples (in development) |
+| `simOcc()` | Simulate single-species occupancy data |
+| `simTOcc()` | Simulate single-species multi-season occupancy data |
+| `simBinom()` | Simulate detection-nondetection data with perfect detection |
+| `simTBinom()` | Simulate multi-season detection-nondetection data with perfect detection |
+| `simMsOcc()` | Simulate multi-species occupancy data |
+| `simTMsOcc()` | Simulate multi-species, multi-season occupancy data |
+| `simIntOcc()` | Simulate single-species occupancy data from multiple data sources |
+| `simIntMsOcc()` | Simulate multi-species occupancy data from multiple data sources |
+| `simTIntOcc()` | Simulate multi-season occupancy data from multiple data sources |
+| `simFpPGOcc()` | Simulate single-species occupancy data with false positives |
 
 ## Example usage
 
@@ -152,7 +155,7 @@ summary(out)
 #> Thinning Rate: 4
 #> Number of Chains: 3
 #> Total Posterior Samples: 9000
-#> Run Time (min): 1.3642
+#> Run Time (min): 1.4931
 #> 
 #> Occurrence (logit scale): 
 #>                          Mean     SD    2.5%     50%   97.5%   Rhat  ESS
@@ -222,7 +225,7 @@ value of this CV score.
 
 ``` r
 out$k.fold.deviance
-#> [1] 1414.027
+#> [1] 1415.212
 ```
 
 ### Prediction

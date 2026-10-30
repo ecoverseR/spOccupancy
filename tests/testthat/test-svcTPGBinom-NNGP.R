@@ -16,7 +16,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 svc.cols <- 1
 psi.RE <- list()
@@ -456,7 +456,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10),
                sigma.sq.psi = c(0.8))
@@ -714,7 +714,7 @@ for (j in 1:J) {
 }
 beta <- c(0.4)
 p.occ <- length(beta)
-trend <- TRUE
+trend <- FALSE 
 sp.only <- 0
 psi.RE <- list(levels = c(10, 15),
                sigma.sq.psi = c(0.8, 0.3))

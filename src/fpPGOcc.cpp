@@ -350,8 +350,6 @@ extern "C" {
     /**********************************************************************
      * Set up MH stuff
      *********************************************************************/
-    // D is not tuned: it is collapsed out of the detection updates and drawn
-    // exactly from its full conditional as a derived quantity.
     double logPostGammaCurr = 0.0, logPostGammaCand = 0.0;
     double logPostDeltaCurr = 0.0, logPostDeltaCand = 0.0;
     double *logPostGammaStarCand = (double *) R_alloc(nTPDetRE, sizeof(double));
@@ -837,6 +835,7 @@ extern "C" {
             thinIndx = 0; 
           }
         }
+        R_CheckUserInterrupt();
       } // r (end batch)
 
       /********************************************************************
